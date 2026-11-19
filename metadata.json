@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "FlowState — Personal Productivity & Task Analytics",
+  "description": "A dark-mode-first personal productivity workspace and daily task manager featuring spring-animated interactions, a 6-month GitHub-style activity heatmap, and real-time completion analytics.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

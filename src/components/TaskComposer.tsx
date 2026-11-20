@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Calendar, Plus } from 'lucide-react';
 import { TaskCategory, TaskPriority } from '../types/productivity';
 import { getOffsetDateISO, getTodayISO } from '../data/seedData';
+import { MagneticButton, SpotlightCard } from './SpotlightCard';
 
 interface TaskComposerProps {
   onAddTask: (task: {
@@ -12,12 +13,21 @@ interface TaskComposerProps {
     dueDate: string;
   }) => void;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  isDimmed?: boolean;
+  onMouseEnterCard?: () => void;
+  onMouseLeaveCard?: () => void;
 }
 
 const CATEGORIES: TaskCategory[] = ['Work', 'Personal', 'Health'];
 const PRIORITIES: TaskPriority[] = ['High', 'Medium', 'Low'];
 
-export const TaskComposer: React.FC<TaskComposerProps> = ({ onAddTask, inputRef }) => {
+export const TaskComposer: React.FC<TaskComposerProps> = ({
+  onAddTask,
+  inputRef,
+  isDimmed = false,
+  onMouseEnterCard,
+  onMouseLeaveCard,
+}) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<TaskCategory>('Work');
   const [priority, setPriority] = useState<TaskPriority>('Medium');
@@ -48,11 +58,15 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({ onAddTask, inputRef 
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-xl border border-slate-800/80 bg-slate-900/65 p-4 backdrop-blur-md transition-colors focus-within:border-indigo-500/60"
+    <SpotlightCard
+      as="div"
+      ariaLabel="Quick-Add Task Composer"
+      isDimmed={isDimmed}
+      onMouseEnterCard={onMouseEnterCard}
+      onMouseLeaveCard={onMouseLeaveCard}
+      className="p-4"
     >
-      <div className="flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {/* Main Input Row */}
         <div className="flex items-center gap-3">
           <input
@@ -65,17 +79,18 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({ onAddTask, inputRef 
             }}
             placeholder="Add a new daily task... (Press Enter to save)"
             aria-label="Task title"
-            className="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 focus:outline-none"
+            className="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none"
           />
 
-          <motion.button
-            whileTap={{ scale: 0.96 }}
+          <MagneticButton
             type="submit"
-            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 cursor-pointer"
+            withShimmer={true}
+            magneticStrength={0.25}
+            className="shrink-0 whitespace-nowrap rounded-lg border border-indigo-400/30 bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-[0_0_20px_-4px_rgba(99,102,241,0.65),inset_0_1px_0_0_rgba(255,255,255,0.25)] transition-colors hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Add Task</span>
-          </motion.button>
+          </MagneticButton>
         </div>
 
         {errorMsg && (
@@ -84,32 +99,40 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({ onAddTask, inputRef 
           </p>
         )}
 
-        {/* Controls Bar: Category, Priority, Due Date */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800/70 pt-3 text-xs">
+        {/* Controls Bar: Category, Priority, Due Date with Sliding layoutId Indicators */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-3 text-xs">
           <div className="flex flex-wrap items-center gap-4">
             {/* Category Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Category:</span>
+              <span className="text-zinc-500">Category:</span>
               <div
                 role="group"
                 aria-label="Select task category"
-                className="flex items-center gap-1 rounded-lg bg-slate-950/70 p-0.5 border border-slate-800/80"
+                className="flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-950/80 p-0.5"
               >
                 {CATEGORIES.map((cat) => {
                   const active = category === cat;
                   return (
-                    <button
+                    <motion.button
                       key={cat}
                       type="button"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                       onClick={() => setCategory(cat)}
-                      className={`whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                        active
-                          ? 'bg-indigo-600/90 text-white'
-                          : 'text-slate-400 hover:text-slate-200'
+                      className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                        active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
-                      {cat}
-                    </button>
+                      {active && (
+                        <motion.span
+                          layoutId="composer-category-pill"
+                          transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+                          className="absolute inset-0 rounded-md border border-indigo-400/30 bg-indigo-600/90 shadow-sm"
+                        />
+                      )}
+                      <span className="relative z-10">{cat}</span>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -117,34 +140,48 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({ onAddTask, inputRef 
 
             {/* Priority Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-500">Priority:</span>
+              <span className="text-zinc-500">Priority:</span>
               <div
                 role="group"
                 aria-label="Select task priority"
-                className="flex items-center gap-1 rounded-lg bg-slate-950/70 p-0.5 border border-slate-800/80"
+                className="flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-950/80 p-0.5"
               >
                 {PRIORITIES.map((prio) => {
                   const active = priority === prio;
-                  const activeStyle =
+                  const activePillColor =
                     prio === 'High'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                      ? 'bg-rose-500/25 border-rose-500/40'
                       : prio === 'Medium'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                        : 'bg-slate-800 text-slate-200 border border-slate-700';
+                        ? 'bg-amber-500/25 border-amber-500/40'
+                        : 'bg-zinc-800 border-white/15';
+                  const activeTextColor =
+                    prio === 'High'
+                      ? 'text-rose-200'
+                      : prio === 'Medium'
+                        ? 'text-amber-200'
+                        : 'text-zinc-100';
 
                   return (
-                    <button
+                    <motion.button
                       key={prio}
                       type="button"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                       onClick={() => setPriority(prio)}
-                      className={`whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                        active
-                          ? activeStyle
-                          : 'text-slate-400 hover:text-slate-200 border border-transparent'
+                      className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                        active ? activeTextColor : 'text-zinc-400 hover:text-zinc-200'
                       }`}
                     >
-                      {prio}
-                    </button>
+                      {active && (
+                        <motion.span
+                          layoutId="composer-priority-pill"
+                          transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+                          className={`absolute inset-0 rounded-md border ${activePillColor}`}
+                        />
+                      )}
+                      <span className="relative z-10">{prio}</span>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -153,41 +190,49 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({ onAddTask, inputRef 
 
           {/* Due Date Selector */}
           <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-slate-400" />
+            <Calendar className="h-3.5 w-3.5 text-zinc-400" />
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setDueDate(todayISO)}
-                className={`whitespace-nowrap shrink-0 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
-                  dueDate === todayISO
-                    ? 'bg-slate-800 text-emerald-400 font-medium'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                type="button"
-                onClick={() => setDueDate(tomorrowISO)}
-                className={`whitespace-nowrap shrink-0 rounded-md px-2 py-1 text-xs transition-colors cursor-pointer ${
-                  dueDate === tomorrowISO
-                    ? 'bg-slate-800 text-indigo-400 font-medium'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Tomorrow
-              </button>
+              {[
+                { label: 'Today', iso: todayISO, activeText: 'text-emerald-300' },
+                { label: 'Tomorrow', iso: tomorrowISO, activeText: 'text-indigo-300' },
+              ].map((preset) => {
+                const active = dueDate === preset.iso;
+                return (
+                  <motion.button
+                    key={preset.label}
+                    type="button"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    onClick={() => setDueDate(preset.iso)}
+                    className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs transition-colors cursor-pointer ${
+                      active
+                        ? `${preset.activeText} font-medium`
+                        : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="composer-duedate-pill"
+                        transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+                        className="absolute inset-0 rounded-md border border-white/10 bg-zinc-800/90"
+                      />
+                    )}
+                    <span className="relative z-10">{preset.label}</span>
+                  </motion.button>
+                );
+              })}
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 aria-label="Custom due date"
-                className="rounded-md border border-slate-800 bg-slate-950/80 px-2 py-1 font-mono text-xs tabular-nums text-slate-300 focus:border-indigo-500 focus:outline-none"
+                className="rounded-md border border-white/10 bg-zinc-950/80 px-2 py-1 font-mono text-xs tabular-nums text-zinc-300 transition-colors focus:border-indigo-500 focus:outline-none cursor-pointer"
               />
             </div>
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </SpotlightCard>
   );
 };

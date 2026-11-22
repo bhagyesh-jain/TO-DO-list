@@ -40,6 +40,7 @@ interface TaskListSectionProps {
   onReorderTasks: (newOrder: Task[]) => void;
   onClearCompleted: () => void;
   onFocusComposer: () => void;
+  isDark?: boolean;
   isDimmed?: boolean;
   onMouseEnterCard?: () => void;
   onMouseLeaveCard?: () => void;
@@ -73,6 +74,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
   onReorderTasks,
   onClearCompleted,
   onFocusComposer,
+  isDark = true,
   isDimmed = false,
   onMouseEnterCard,
   onMouseLeaveCard,
@@ -120,24 +122,25 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
   const completedCount = tasks.filter((t) => t.completed).length;
 
   const getPriorityTextClass = (priority: TaskPriority) => {
-    if (priority === 'High') return 'text-rose-400 font-medium';
-    if (priority === 'Medium') return 'text-amber-400 font-medium';
-    return 'text-zinc-400';
+    if (priority === 'High') return 'text-rose-600 dark:text-rose-400 font-medium';
+    if (priority === 'Medium') return 'text-amber-600 dark:text-amber-400 font-medium';
+    return 'text-slate-500 dark:text-zinc-400';
   };
 
   const getCategoryTextClass = (category: Task['category']) => {
-    if (category === 'Work') return 'text-indigo-400 font-medium';
-    if (category === 'Health') return 'text-emerald-400 font-medium';
-    return 'text-violet-400 font-medium';
+    if (category === 'Work') return 'text-indigo-600 dark:text-indigo-400 font-medium';
+    if (category === 'Health') return 'text-emerald-600 dark:text-emerald-400 font-medium';
+    return 'text-violet-600 dark:text-violet-400 font-medium';
   };
 
   return (
     <SpotlightCard
       ariaLabel="Daily Tasks List"
+      isDark={isDark}
       isDimmed={isDimmed}
       onMouseEnterCard={onMouseEnterCard}
       onMouseLeaveCard={onMouseLeaveCard}
-      className="p-5"
+      className="p-5 overflow-hidden"
     >
       <div className="flex flex-col gap-4">
         {/* Toolbar Row 1: Sliding layoutId Status Filter Tabs & Search */}
@@ -146,7 +149,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
           <div
             role="tablist"
             aria-label="Filter tasks by completion status"
-            className="flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-950/80 p-1"
+            className="flex items-center gap-1 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 p-1 transition-colors duration-300"
           >
             {STATUS_FILTERS.map((status) => {
               const active = statusFilter === status;
@@ -167,20 +170,22 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   onClick={() => onStatusFilterChange(status)}
                   className={`relative whitespace-nowrap shrink-0 rounded-md px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
-                    active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    active
+                      ? 'text-white'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
                   }`}
                 >
                   {active && (
                     <motion.span
                       layoutId="task-status-filter-pill"
                       transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                      className="absolute inset-0 rounded-md border border-indigo-400/30 bg-indigo-600 shadow-[0_0_14px_rgba(99,102,241,0.45)]"
+                      className="absolute inset-0 rounded-md border border-indigo-500/30 dark:border-indigo-400/30 bg-indigo-600 dark:bg-indigo-500 shadow-[0_2px_10px_rgba(79,70,229,0.35)]"
                     />
                   )}
                   <span className="relative z-10">{status}</span>
                   <span
                     className={`relative z-10 ml-1.5 font-mono tabular-nums text-[11px] ${
-                      active ? 'text-indigo-100' : 'text-zinc-500'
+                      active ? 'text-indigo-100' : 'text-slate-400 dark:text-zinc-500'
                     }`}
                   >
                     {count}
@@ -192,14 +197,14 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
 
           {/* Search Input */}
           <div className="relative flex-1 min-w-[180px] max-w-xs">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
               placeholder="Filter tasks..."
               aria-label="Filter tasks by keyword"
-              className="w-full rounded-lg border border-white/10 bg-zinc-950/80 py-1.5 pl-8 pr-7 text-xs text-zinc-200 placeholder-zinc-500 transition-colors focus:border-indigo-500/70 focus:outline-none"
+              className="w-full rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 py-1.5 pl-8 pr-7 text-xs text-slate-900 dark:text-zinc-200 placeholder-slate-400 dark:placeholder-zinc-500 transition-colors focus:border-indigo-500/70 focus:outline-none"
             />
             {searchQuery && (
               <motion.button
@@ -209,7 +214,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 onClick={() => onSearchQueryChange('')}
                 aria-label="Clear search query"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-300 cursor-pointer"
               >
                 <X className="h-3.5 w-3.5" />
               </motion.button>
@@ -218,11 +223,11 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
         </div>
 
         {/* Toolbar Row 2: Sliding layoutId Category Tabs & Sort Mode */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-3 text-xs">
           <div
             role="group"
             aria-label="Filter tasks by category"
-            className="flex flex-wrap items-center gap-1 rounded-lg border border-white/5 bg-zinc-950/50 p-0.5"
+            className="flex flex-wrap items-center gap-1 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 p-0.5 transition-colors duration-300"
           >
             {CATEGORY_FILTERS.map((cat) => {
               const active = categoryFilter === cat;
@@ -235,14 +240,16 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   onClick={() => onCategoryFilterChange(cat)}
                   className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                    active ? 'text-zinc-100' : 'text-zinc-400 hover:text-zinc-200'
+                    active
+                      ? 'text-slate-900 dark:text-zinc-100'
+                      : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
                   }`}
                 >
                   {active && (
                     <motion.span
                       layoutId="task-category-filter-pill"
                       transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                      className="absolute inset-0 rounded-md border border-white/15 bg-zinc-800/90 shadow-xs"
+                      className="absolute inset-0 rounded-md border border-slate-200 dark:border-white/15 bg-white dark:bg-zinc-800 shadow-2xs"
                     />
                   )}
                   <span className="relative z-10">
@@ -254,7 +261,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-zinc-950/80 p-0.5">
+            <div className="flex items-center gap-1 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 p-0.5 transition-colors duration-300">
               {(
                 [
                   { id: 'manual', label: 'Manual Drag', icon: GripVertical },
@@ -273,7 +280,11 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     onClick={() => onSortModeChange(item.id)}
                     className={`relative inline-flex items-center gap-1 whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
-                      active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+                      active
+                        ? item.id === 'manual'
+                          ? 'text-slate-900 dark:text-white'
+                          : 'text-white'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
                     }`}
                   >
                     {active && (
@@ -282,8 +293,8 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                         transition={{ type: 'spring', stiffness: 420, damping: 30 }}
                         className={`absolute inset-0 rounded-md border ${
                           item.id === 'manual'
-                            ? 'border-white/15 bg-zinc-800'
-                            : 'border-indigo-400/30 bg-indigo-600/90'
+                            ? 'border-slate-200 dark:border-white/15 bg-white dark:bg-zinc-800'
+                            : 'border-indigo-500/30 dark:border-indigo-400/30 bg-indigo-600 dark:bg-indigo-500'
                         }`}
                       />
                     )}
@@ -303,12 +314,12 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center gap-3 py-12 text-center"
           >
-            <ListChecks className="h-8 w-8 text-zinc-600" />
+            <ListChecks className="h-8 w-8 text-slate-400 dark:text-zinc-600" />
             <div className="space-y-1">
-              <h3 className="font-display text-sm font-semibold text-zinc-200">
+              <h3 className="font-display text-sm font-semibold text-slate-800 dark:text-zinc-200">
                 No matching tasks found
               </h3>
-              <p className="max-w-xs text-xs text-zinc-400">
+              <p className="max-w-xs text-xs text-slate-600 dark:text-zinc-400">
                 {searchQuery || statusFilter !== 'All' || categoryFilter !== 'All'
                   ? 'Try clearing your active filters or search query to view all scheduled tasks.'
                   : 'Your task queue is clear. Add a new task above to start tracking your daily momentum.'}
@@ -321,7 +332,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                   onCategoryFilterChange('All');
                   onSearchQueryChange('');
                 }}
-                className="whitespace-nowrap shrink-0 rounded-lg border border-white/15 bg-zinc-800/80 px-3.5 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-700"
+                className="whitespace-nowrap shrink-0 rounded-lg border border-slate-200 dark:border-white/15 bg-slate-100 dark:bg-zinc-800/80 px-3.5 py-1.5 text-xs font-medium text-slate-800 dark:text-zinc-200 transition-colors hover:bg-slate-200 dark:hover:bg-zinc-700"
               >
                 Reset Filters
               </MagneticButton>
@@ -329,7 +340,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
               <MagneticButton
                 withShimmer={true}
                 onClick={onFocusComposer}
-                className="whitespace-nowrap shrink-0 rounded-lg border border-indigo-400/30 bg-indigo-600 px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-500"
+                className="whitespace-nowrap shrink-0 rounded-lg border border-indigo-500/30 bg-indigo-600 dark:bg-indigo-500 px-3.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-indigo-700 dark:hover:bg-indigo-400"
               >
                 Create First Task
               </MagneticButton>
@@ -357,6 +368,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                     task={task}
                     todayISO={todayISO}
                     canDrag={true}
+                    isDark={isDark}
                     onToggleTask={onToggleTask}
                     onDeleteTask={onDeleteTask}
                     onCyclePriority={onCyclePriority}
@@ -383,6 +395,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
                     task={task}
                     todayISO={todayISO}
                     canDrag={false}
+                    isDark={isDark}
                     onToggleTask={onToggleTask}
                     onDeleteTask={onDeleteTask}
                     onCyclePriority={onCyclePriority}
@@ -396,11 +409,17 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
         )}
 
         {/* Footer Summary & Clear Completed */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-3 text-xs text-zinc-400">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 dark:border-white/10 pt-3 text-xs text-slate-600 dark:text-zinc-400">
           <span>
             Showing{' '}
-            <span className="font-mono tabular-nums text-zinc-200">{displayTasks.length}</span> of{' '}
-            <span className="font-mono tabular-nums text-zinc-200">{tasks.length}</span> tasks
+            <span className="font-mono tabular-nums text-slate-900 dark:text-zinc-200">
+              {displayTasks.length}
+            </span>{' '}
+            of{' '}
+            <span className="font-mono tabular-nums text-slate-900 dark:text-zinc-200">
+              {tasks.length}
+            </span>{' '}
+            tasks
             {canDragReorder ? ' · Grab handle to reorder' : ''}
           </span>
 
@@ -411,7 +430,7 @@ export const TaskListSection: React.FC<TaskListSectionProps> = ({
               whileTap={{ scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               onClick={onClearCompleted}
-              className="whitespace-nowrap shrink-0 text-xs font-medium text-zinc-400 transition-colors hover:text-rose-400 cursor-pointer"
+              className="whitespace-nowrap shrink-0 text-xs font-medium text-slate-600 dark:text-zinc-400 transition-colors hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer"
             >
               Clear completed ({completedCount})
             </motion.button>
@@ -426,6 +445,7 @@ interface SpotlightTaskRowProps {
   task: Task;
   todayISO: string;
   canDrag: boolean;
+  isDark: boolean;
   onToggleTask: (id: string) => void;
   onDeleteTask: (id: string) => void;
   onCyclePriority: (id: string) => void;
@@ -435,7 +455,7 @@ interface SpotlightTaskRowProps {
 
 /**
  * Individual task row with:
- * - Cursor-tracking radial spotlight hover & 1px border illumination
+ * - Theme-aware cursor-tracking radial spotlight hover & 1px border illumination
  * - Contextual cursor states (cursor-grab / active:cursor-grabbing for draggable rows)
  * - Custom self-drawing SVG checkmark (pathLength: 0 -> 1) + 8-particle radial burst
  * - Smooth animated strikethrough and magnetic delete button
@@ -444,6 +464,7 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
   task,
   todayISO,
   canDrag,
+  isDark,
   onToggleTask,
   onDeleteTask,
   onCyclePriority,
@@ -461,14 +482,18 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
     mouseY.set(e.clientY - rect.top);
   };
 
-  const rowSpotlight = useMotionTemplate`radial-gradient(280px circle at ${mouseX}px ${mouseY}px, rgba(99, 102, 241, 0.12), transparent 80%)`;
+  const spotlightColor = isDark
+    ? 'rgba(255, 255, 255, 0.06)'
+    : 'rgba(99, 102, 241, 0.08)';
+
+  const rowSpotlight = useMotionTemplate`radial-gradient(260px circle at ${mouseX}px ${mouseY}px, ${spotlightColor}, transparent 80%)`;
   const isOverdue = !task.completed && task.dueDate < todayISO;
 
   return (
     <div
       ref={rowRef}
       onMouseMove={handleMouseMove}
-      className={`group/row relative flex items-center justify-between gap-3 overflow-hidden rounded-lg border border-white/[0.06] bg-zinc-950/45 px-3.5 py-3 transition-colors duration-150 hover:border-white/15 hover:bg-zinc-900/70 ${
+      className={`group/row relative flex items-center justify-between gap-3 overflow-hidden rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 px-3.5 py-3 transition-colors duration-200 hover:border-indigo-400/50 dark:hover:border-white/20 hover:bg-white/95 dark:hover:bg-zinc-800/80 ${
         canDrag ? 'cursor-grab active:cursor-grabbing' : ''
       }`}
     >
@@ -483,7 +508,7 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
         {canDrag && (
           <span
             title="Drag to reorder task"
-            className="mt-0.5 cursor-grab text-zinc-600 transition-colors group-hover/row:text-zinc-400 active:cursor-grabbing"
+            className="mt-0.5 cursor-grab text-slate-400 dark:text-zinc-500 transition-colors group-hover/row:text-slate-600 dark:group-hover/row:text-zinc-300 active:cursor-grabbing"
           >
             <GripVertical className="h-4 w-4" />
           </span>
@@ -504,8 +529,8 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
             }
             className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors cursor-pointer ${
               task.completed
-                ? 'border-emerald-400 bg-emerald-500 text-zinc-950 shadow-[0_0_12px_rgba(16,185,129,0.5)]'
-                : 'border-zinc-700 bg-zinc-950/80 hover:border-indigo-400'
+                ? 'border-emerald-600 dark:border-emerald-400 bg-emerald-600 dark:bg-emerald-500 text-white dark:text-zinc-950 shadow-[0_0_12px_rgba(16,185,129,0.45)]'
+                : 'border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-950/80 hover:border-indigo-500 dark:hover:border-indigo-400'
             }`}
           >
             <svg
@@ -557,7 +582,9 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
                         ease: [0.16, 1, 0.3, 1],
                       }}
                       className={`absolute h-1 w-1 rounded-full ${
-                        i % 2 === 0 ? 'bg-emerald-400' : 'bg-indigo-400'
+                        i % 2 === 0
+                          ? 'bg-emerald-600 dark:bg-emerald-400'
+                          : 'bg-indigo-600 dark:bg-indigo-400'
                       }`}
                     />
                   );
@@ -573,7 +600,9 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
             <span
               onClick={() => onToggleTask(task.id)}
               className={`block cursor-pointer text-sm leading-snug transition-colors ${
-                task.completed ? 'text-zinc-500' : 'text-zinc-100'
+                task.completed
+                  ? 'text-slate-400 dark:text-zinc-500'
+                  : 'text-slate-900 dark:text-zinc-100'
               }`}
             >
               {task.title}
@@ -587,14 +616,14 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
                 opacity: task.completed ? 1 : 0,
               }}
               transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-              className="pointer-events-none absolute left-0 top-1/2 h-[1.5px] -translate-y-1/2 bg-gradient-to-r from-emerald-400 to-indigo-400"
+              className="pointer-events-none absolute left-0 top-1/2 h-[1.5px] -translate-y-1/2 bg-gradient-to-r from-emerald-600 to-indigo-600 dark:from-emerald-400 dark:to-indigo-400"
             />
           </div>
 
           {/* Unboxed Metadata Line (Zero-Pill Discipline) */}
-          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-400">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-zinc-400">
             <span className={getCategoryTextClass(task.category)}>{task.category}</span>
-            <span aria-hidden="true" className="text-zinc-600">
+            <span aria-hidden="true" className="text-slate-400 dark:text-zinc-600">
               ·
             </span>
             <motion.button
@@ -608,16 +637,16 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
             >
               {task.priority} Priority
             </motion.button>
-            <span aria-hidden="true" className="text-zinc-600">
+            <span aria-hidden="true" className="text-slate-400 dark:text-zinc-600">
               ·
             </span>
             <span
               className={`font-mono tabular-nums ${
                 isOverdue
-                  ? 'text-rose-400 font-medium'
+                  ? 'text-rose-600 dark:text-rose-400 font-medium'
                   : task.dueDate === todayISO && !task.completed
-                    ? 'text-emerald-400'
-                    : 'text-zinc-400'
+                    ? 'text-emerald-600 dark:text-emerald-400 font-medium'
+                    : 'text-slate-600 dark:text-zinc-400'
               }`}
             >
               Due {formatHumanDate(task.dueDate)}
@@ -632,7 +661,7 @@ const SpotlightTaskRow: React.FC<SpotlightTaskRowProps> = ({
         magneticStrength={0.35}
         onClick={() => onDeleteTask(task.id)}
         aria-label={`Delete task "${task.title}"`}
-        className="relative z-10 shrink-0 rounded-md p-1.5 text-zinc-500 opacity-75 transition-colors hover:bg-rose-500/15 hover:text-rose-400 group-hover/row:opacity-100"
+        className="relative z-10 shrink-0 rounded-md p-1.5 text-slate-400 dark:text-zinc-500 opacity-75 transition-colors hover:bg-rose-500/15 hover:text-rose-600 dark:hover:text-rose-400 group-hover/row:opacity-100"
       >
         <Trash2 className="h-4 w-4" />
       </MagneticButton>

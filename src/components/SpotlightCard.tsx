@@ -6,8 +6,11 @@ interface SpotlightCardProps {
   className?: string;
   ariaLabel?: string;
   as?: 'section' | 'div';
-  spotlightColor?: string;
-  borderGlowColor?: string;
+  isDark?: boolean;
+  spotlightColorDark?: string;
+  spotlightColorLight?: string;
+  borderGlowColorDark?: string;
+  borderGlowColorLight?: string;
   enableHoverLift?: boolean;
   isDimmed?: boolean;
   onMouseEnterCard?: () => void;
@@ -15,18 +18,21 @@ interface SpotlightCardProps {
 }
 
 /**
- * Linear / Raycast-inspired translucent surface card with:
- * - Cursor-tracking radial surface spotlight & 1px border illumination
- * - Top-edge specular highlight (border-white/10 + inset highlight)
- * - Subtle hover elevation (y: -2px) and sibling focus dimming support
+ * Linear / Raycast-inspired dual-theme Bento card with:
+ * - Dark Mode: bg-zinc-900/70 backdrop-blur-xl, border-white/10, shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)], spotlight rgba(255,255,255,0.06)
+ * - Light Mode: bg-white/85 backdrop-blur-xl, border-slate-200/80, shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)], spotlight rgba(99,102,241,0.08)
+ * - Hover Lift (y: -2px) with gentle border brighten and sibling focus dimming
  */
 export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   children,
   className = '',
   ariaLabel,
   as = 'section',
-  spotlightColor = 'rgba(99, 102, 241, 0.13)',
-  borderGlowColor = 'rgba(165, 180, 252, 0.38)',
+  isDark = true,
+  spotlightColorDark = 'rgba(255, 255, 255, 0.06)',
+  spotlightColorLight = 'rgba(99, 102, 241, 0.08)',
+  borderGlowColorDark = 'rgba(165, 180, 252, 0.35)',
+  borderGlowColorLight = 'rgba(79, 70, 229, 0.28)',
   enableHoverLift = true,
   isDimmed = false,
   onMouseEnterCard,
@@ -55,8 +61,11 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
     onMouseLeaveCard?.();
   };
 
-  const surfaceBackground = useMotionTemplate`radial-gradient(520px circle at ${mouseX}px ${mouseY}px, ${spotlightColor}, transparent 75%)`;
-  const borderBackground = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, ${borderGlowColor}, transparent 80%)`;
+  const activeSpotlight = isDark ? spotlightColorDark : spotlightColorLight;
+  const activeBorderGlow = isDark ? borderGlowColorDark : borderGlowColorLight;
+
+  const surfaceBackground = useMotionTemplate`radial-gradient(500px circle at ${mouseX}px ${mouseY}px, ${activeSpotlight}, transparent 75%)`;
+  const borderBackground = useMotionTemplate`radial-gradient(280px circle at ${mouseX}px ${mouseY}px, ${activeBorderGlow}, transparent 80%)`;
 
   const Component = as === 'section' ? motion.section : motion.div;
 
@@ -70,15 +79,15 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
       animate={{
         y: isHovered && enableHoverLift ? -2 : 0,
         opacity: isDimmed ? 0.62 : 1,
-        scale: isDimmed ? 0.993 : 1,
+        scale: isDimmed ? 0.994 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-      className={`group/card relative overflow-hidden rounded-xl border border-white/10 bg-zinc-900/60 backdrop-blur-xl shadow-[0_12px_36px_-12px_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.12)] transition-colors duration-200 hover:border-white/20 ${className}`}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className={`group/card relative rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/85 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_12px_32px_-12px_rgba(0,0,0,0.65)] transition-colors duration-300 hover:border-indigo-400/50 dark:hover:border-white/20 ${className}`}
     >
       {/* 1px Specular Top Edge Highlight */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-75 transition-opacity duration-300 group-hover/card:opacity-100"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-indigo-500/20 dark:via-white/25 to-transparent opacity-70 transition-opacity duration-300 group-hover/card:opacity-100"
       />
 
       {/* Cursor-Tracking Radial Border Glow */}
@@ -88,10 +97,10 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
         className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
       />
 
-      {/* Inner Dark Mask to keep border crisp while showing radial surface spotlight */}
+      {/* Inner Surface Mask */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-[1px] rounded-[11px] bg-zinc-950/40"
+        className="pointer-events-none absolute inset-[1px] rounded-[11px] bg-white/90 dark:bg-zinc-900/85 transition-colors duration-300"
       />
 
       {/* Cursor-Tracking Surface Radial Spotlight */}
@@ -171,7 +180,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
       {withShimmer && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full"
+          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full"
         />
       )}
       <span className="relative z-10 inline-flex items-center justify-center gap-1.5">

@@ -67,9 +67,9 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
       isDimmed={isDimmed}
       onMouseEnterCard={onMouseEnterCard}
       onMouseLeaveCard={onMouseLeaveCard}
-      className="p-4 overflow-hidden"
+      className="p-5 overflow-hidden"
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
         {/* Main Input Row */}
         <div className="flex items-center gap-3">
           <input
@@ -80,16 +80,17 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
               setTitle(e.target.value);
               if (errorMsg) setErrorMsg(null);
             }}
-            placeholder="Add a new daily task... (Press Enter to save)"
+            placeholder="Write a new field entry... (Press Enter to stamp)"
             aria-label="Task title"
-            className="w-full bg-transparent text-sm text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-500 focus:outline-none"
+            className="w-full bg-transparent text-sm text-[#23211E] dark:text-[#ECE8DF] placeholder-[#7A756B] dark:placeholder-[#8C877D] focus:outline-none"
           />
 
+          {/* Precision Matte Vermilion Hardware Key */}
           <MagneticButton
             type="submit"
             withShimmer={true}
-            magneticStrength={0.25}
-            className="shrink-0 whitespace-nowrap rounded-lg border border-indigo-500/30 dark:border-indigo-400/30 bg-indigo-600 dark:bg-indigo-500 px-3.5 py-2 text-xs font-medium text-white shadow-[0_2px_10px_-2px_rgba(79,70,229,0.45)] dark:shadow-[0_0_20px_-4px_rgba(99,102,241,0.65),inset_0_1px_0_0_rgba(255,255,255,0.25)] transition-colors hover:bg-indigo-700 dark:hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            magneticStrength={0.18}
+            className="shrink-0 whitespace-nowrap rounded-lg border border-[#B83B1F] dark:border-[#C9482C] bg-[#D94A2B] dark:bg-[#E85D3F] px-3.5 py-2 text-xs font-medium text-[#FCFBF7] shadow-[0_2px_0_0_#9E3119,inset_0_1px_0_0_rgba(255,255,255,0.24)] active:translate-y-[1px] transition-colors hover:bg-[#C64123] dark:hover:bg-[#F0684B] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D94A2B]"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Add Task</span>
@@ -97,21 +98,21 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
         </div>
 
         {errorMsg && (
-          <p role="alert" className="text-xs text-rose-600 dark:text-rose-400">
+          <p role="alert" className="text-xs text-[#D94A2B] dark:text-[#E85D3F]">
             {errorMsg}
           </p>
         )}
 
-        {/* Controls Bar: Category, Priority, Due Date with Sliding layoutId Indicators */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/80 dark:border-white/10 pt-3 text-xs">
+        {/* Controls Bar: Recessed Hardware Tracks with Sliding layoutId Pills */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#E4DFD3] dark:border-[#2C2A26] pt-3.5 text-xs">
           <div className="flex flex-wrap items-center gap-4">
             {/* Category Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-400 dark:text-zinc-500">Category:</span>
+              <span className="text-[#7A756B] dark:text-[#8C877D]">Category:</span>
               <div
                 role="group"
                 aria-label="Select task category"
-                className="flex items-center gap-1 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 p-0.5 transition-colors duration-300"
+                className="flex items-center gap-1 rounded-lg border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4] dark:bg-[#141311] p-0.5 shadow-[inset_0_1px_2px_rgba(35,33,30,0.08)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.55)] transition-colors duration-300"
               >
                 {CATEGORIES.map((cat) => {
                   const active = category === cat;
@@ -125,15 +126,15 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
                       onClick={() => setCategory(cat)}
                       className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
                         active
-                          ? 'text-white'
-                          : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+                          ? 'text-[#23211E] dark:text-[#ECE8DF]'
+                          : 'text-[#7A756B] hover:text-[#23211E] dark:text-[#8C877D] dark:hover:text-[#ECE8DF]'
                       }`}
                     >
                       {active && (
                         <motion.span
                           layoutId="composer-category-pill"
                           transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                          className="absolute inset-0 rounded-md border border-indigo-500/30 dark:border-indigo-400/30 bg-indigo-600 dark:bg-indigo-500 shadow-xs"
+                          className="absolute inset-0 rounded-md border border-[#D5CFC0] dark:border-[#3A3731] bg-[#FCFBF7] dark:bg-[#262420] shadow-[0_1px_2px_rgba(35,33,30,0.1),inset_0_1px_0_rgba(255,255,255,0.6)] dark:shadow-[0_1px_2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)]"
                         />
                       )}
                       <span className="relative z-10">{cat}</span>
@@ -145,26 +146,26 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
 
             {/* Priority Selector */}
             <div className="flex items-center gap-1.5">
-              <span className="text-slate-400 dark:text-zinc-500">Priority:</span>
+              <span className="text-[#7A756B] dark:text-[#8C877D]">Priority:</span>
               <div
                 role="group"
                 aria-label="Select task priority"
-                className="flex items-center gap-1 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 p-0.5 transition-colors duration-300"
+                className="flex items-center gap-1 rounded-lg border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4] dark:bg-[#141311] p-0.5 shadow-[inset_0_1px_2px_rgba(35,33,30,0.08)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.55)] transition-colors duration-300"
               >
                 {PRIORITIES.map((prio) => {
                   const active = priority === prio;
                   const activePillColor =
                     prio === 'High'
-                      ? 'bg-rose-500/15 dark:bg-rose-500/25 border-rose-500/40'
+                      ? 'bg-[#D94A2B]/15 dark:bg-[#E85D3F]/20 border-[#D94A2B]/40 dark:border-[#E85D3F]/45'
                       : prio === 'Medium'
-                        ? 'bg-amber-500/15 dark:bg-amber-500/25 border-amber-500/40'
-                        : 'bg-white dark:bg-zinc-700/80 border-slate-300 dark:border-white/15';
+                        ? 'bg-[#C4842D]/15 dark:bg-[#D99B3E]/20 border-[#C4842D]/40 dark:border-[#D99B3E]/40'
+                        : 'bg-[#FCFBF7] dark:bg-[#262420] border-[#D5CFC0] dark:border-[#3A3731]';
                   const activeTextColor =
                     prio === 'High'
-                      ? 'text-rose-700 dark:text-rose-200'
+                      ? 'text-[#B83B1F] dark:text-[#F07358]'
                       : prio === 'Medium'
-                        ? 'text-amber-700 dark:text-amber-200'
-                        : 'text-slate-900 dark:text-zinc-100';
+                        ? 'text-[#9A631A] dark:text-[#E8B15A]'
+                        : 'text-[#23211E] dark:text-[#ECE8DF]';
 
                   return (
                     <motion.button
@@ -177,14 +178,14 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
                       className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
                         active
                           ? activeTextColor
-                          : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+                          : 'text-[#7A756B] hover:text-[#23211E] dark:text-[#8C877D] dark:hover:text-[#ECE8DF]'
                       }`}
                     >
                       {active && (
                         <motion.span
                           layoutId="composer-priority-pill"
                           transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                          className={`absolute inset-0 rounded-md border ${activePillColor}`}
+                          className={`absolute inset-0 rounded-md border shadow-[0_1px_2px_rgba(0,0,0,0.08)] ${activePillColor}`}
                         />
                       )}
                       <span className="relative z-10">{prio}</span>
@@ -197,18 +198,18 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
 
           {/* Due Date Selector */}
           <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-slate-500 dark:text-zinc-400" />
-            <div className="flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5 text-[#7A756B] dark:text-[#8C877D]" />
+            <div className="flex items-center gap-1 rounded-lg border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4] dark:bg-[#141311] p-0.5 shadow-[inset_0_1px_2px_rgba(35,33,30,0.08)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.55)]">
               {[
                 {
                   label: 'Today',
                   iso: todayISO,
-                  activeText: 'text-emerald-700 dark:text-emerald-300',
+                  activeText: 'text-[#5B7553] dark:text-[#74946A]',
                 },
                 {
                   label: 'Tomorrow',
                   iso: tomorrowISO,
-                  activeText: 'text-indigo-700 dark:text-indigo-300',
+                  activeText: 'text-[#D94A2B] dark:text-[#E85D3F]',
                 },
               ].map((preset) => {
                 const active = dueDate === preset.iso;
@@ -222,15 +223,15 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
                     onClick={() => setDueDate(preset.iso)}
                     className={`relative whitespace-nowrap shrink-0 rounded-md px-2.5 py-1 text-xs transition-colors cursor-pointer ${
                       active
-                        ? `${preset.activeText} font-medium`
-                        : 'text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200'
+                        ? `${preset.activeText} font-semibold`
+                        : 'text-[#7A756B] hover:text-[#23211E] dark:text-[#8C877D] dark:hover:text-[#ECE8DF]'
                     }`}
                   >
                     {active && (
                       <motion.span
                         layoutId="composer-duedate-pill"
                         transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-                        className="absolute inset-0 rounded-md border border-slate-200/80 dark:border-white/10 bg-slate-100/90 dark:bg-zinc-800/90"
+                        className="absolute inset-0 rounded-md border border-[#D5CFC0] dark:border-[#3A3731] bg-[#FCFBF7] dark:bg-[#262420] shadow-2xs"
                       />
                     )}
                     <span className="relative z-10">{preset.label}</span>
@@ -242,7 +243,7 @@ export const TaskComposer: React.FC<TaskComposerProps> = ({
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
                 aria-label="Custom due date"
-                className="rounded-md border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 px-2 py-1 font-mono text-xs tabular-nums text-slate-800 dark:text-zinc-300 transition-colors focus:border-indigo-500 focus:outline-none cursor-pointer"
+                className="rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] px-2 py-0.5 font-mono text-xs tabular-nums text-[#23211E] dark:text-[#ECE8DF] transition-colors focus:border-[#D94A2B] dark:focus:border-[#E85D3F] focus:outline-none cursor-pointer"
               />
             </div>
           </div>

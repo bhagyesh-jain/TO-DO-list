@@ -18,10 +18,10 @@ interface SpotlightCardProps {
 }
 
 /**
- * Linear / Raycast-inspired dual-theme Bento card with:
- * - Dark Mode: bg-zinc-900/70 backdrop-blur-xl, border-white/10, shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)], spotlight rgba(255,255,255,0.06)
- * - Light Mode: bg-white/85 backdrop-blur-xl, border-slate-200/80, shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)], spotlight rgba(99,102,241,0.08)
- * - Hover Lift (y: -2px) with gentle border brighten and sibling focus dimming
+ * 70% Japanese Field Journal + 30% Tactile Braun Hardware Surface Card:
+ * - Light Mode: Matte Washi Card (#FCFBF7), 1px Hairline Border (#E4DFD3), subtle paper shadow
+ * - Dark Mode: Matte Sumi Card (#1E1D1A), 1px Hairline Border (#2C2A26), subtle hardware bevel highlight
+ * - Warm paper/vermilion radial pointer illumination without neon/glassmorphism
  */
 export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   children,
@@ -29,10 +29,10 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   ariaLabel,
   as = 'section',
   isDark = true,
-  spotlightColorDark = 'rgba(255, 255, 255, 0.06)',
-  spotlightColorLight = 'rgba(99, 102, 241, 0.08)',
-  borderGlowColorDark = 'rgba(165, 180, 252, 0.35)',
-  borderGlowColorLight = 'rgba(79, 70, 229, 0.28)',
+  spotlightColorDark = 'rgba(236, 232, 223, 0.035)',
+  spotlightColorLight = 'rgba(217, 74, 43, 0.04)',
+  borderGlowColorDark = 'rgba(232, 93, 63, 0.28)',
+  borderGlowColorLight = 'rgba(217, 74, 43, 0.24)',
   enableHoverLift = true,
   isDimmed = false,
   onMouseEnterCard,
@@ -64,8 +64,8 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   const activeSpotlight = isDark ? spotlightColorDark : spotlightColorLight;
   const activeBorderGlow = isDark ? borderGlowColorDark : borderGlowColorLight;
 
-  const surfaceBackground = useMotionTemplate`radial-gradient(500px circle at ${mouseX}px ${mouseY}px, ${activeSpotlight}, transparent 75%)`;
-  const borderBackground = useMotionTemplate`radial-gradient(280px circle at ${mouseX}px ${mouseY}px, ${activeBorderGlow}, transparent 80%)`;
+  const surfaceBackground = useMotionTemplate`radial-gradient(460px circle at ${mouseX}px ${mouseY}px, ${activeSpotlight}, transparent 75%)`;
+  const borderBackground = useMotionTemplate`radial-gradient(260px circle at ${mouseX}px ${mouseY}px, ${activeBorderGlow}, transparent 80%)`;
 
   const Component = as === 'section' ? motion.section : motion.div;
 
@@ -77,33 +77,27 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       animate={{
-        y: isHovered && enableHoverLift ? -2 : 0,
-        opacity: isDimmed ? 0.62 : 1,
-        scale: isDimmed ? 0.994 : 1,
+        y: isHovered && enableHoverLift ? -1.5 : 0,
+        opacity: isDimmed ? 0.68 : 1,
+        scale: isDimmed ? 0.996 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={`group/card relative rounded-xl border border-slate-200/80 dark:border-white/10 bg-white/85 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08),0_12px_32px_-12px_rgba(0,0,0,0.65)] transition-colors duration-300 hover:border-indigo-400/50 dark:hover:border-white/20 ${className}`}
+      transition={{ type: 'spring', stiffness: 400, damping: 26 }}
+      className={`group/card relative rounded-xl border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] shadow-[0_2px_6px_-2px_rgba(35,33,30,0.06),0_1px_0_0_rgba(255,255,255,0.8)_inset] dark:shadow-[0_4px_14px_-4px_rgba(0,0,0,0.55),0_1px_0_0_rgba(236,232,223,0.05)_inset] transition-colors duration-300 hover:border-[#D0C9B8] dark:hover:border-[#3D3A34] ${className}`}
     >
-      {/* 1px Specular Top Edge Highlight */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px rounded-t-xl bg-gradient-to-r from-transparent via-indigo-500/20 dark:via-white/25 to-transparent opacity-70 transition-opacity duration-300 group-hover/card:opacity-100"
-      />
-
-      {/* Cursor-Tracking Radial Border Glow */}
+      {/* Cursor-Tracking Tactile Border Illumination */}
       <motion.div
         aria-hidden="true"
         style={{ background: borderBackground }}
         className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition-opacity duration-300 group-hover/card:opacity-100"
       />
 
-      {/* Inner Surface Mask */}
+      {/* Inner Matte Washi / Sumi Paper Surface Mask */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-[1px] rounded-[11px] bg-white/90 dark:bg-zinc-900/85 transition-colors duration-300"
+        className="pointer-events-none absolute inset-[1px] rounded-[11px] bg-[#FCFBF7] dark:bg-[#1E1D1A] transition-colors duration-300"
       />
 
-      {/* Cursor-Tracking Surface Radial Spotlight */}
+      {/* Subtle Warm Desk Lamp Radial Spotlight */}
       <motion.div
         aria-hidden="true"
         style={{ background: surfaceBackground }}
@@ -124,15 +118,14 @@ interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEleme
 }
 
 /**
- * Tactile Linear/Raycast button with:
- * - Spring press physics (whileTap={{ scale: 0.96 }}, whileHover={{ scale: 1.02 }}, stiffness 400, damping 25)
- * - Subtle magnetic cursor pull toward the pointer
- * - Optional animated light sweep / shimmer across primary CTAs on hover
+ * Tactile Braun Hardware Key Button:
+ * - Crisp spring press (whileTap={{ scale: 0.96 }}, whileHover={{ scale: 1.02 }}, stiffness 400, damping 25)
+ * - Subtle magnetic cursor alignment
  */
 export const MagneticButton: React.FC<MagneticButtonProps> = ({
   children,
   className = '',
-  magneticStrength = 0.22,
+  magneticStrength = 0.16,
   withShimmer = false,
   onClick,
   type = 'button',
@@ -144,8 +137,8 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
 
-  const springX = useSpring(rawX, { stiffness: 360, damping: 22, mass: 0.4 });
-  const springY = useSpring(rawY, { stiffness: 360, damping: 22, mass: 0.4 });
+  const springX = useSpring(rawX, { stiffness: 380, damping: 24, mass: 0.4 });
+  const springY = useSpring(rawY, { stiffness: 380, damping: 24, mass: 0.4 });
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!btnRef.current || disabled) return;
@@ -180,7 +173,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
       {withShimmer && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full"
+          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent transition-transform duration-700 ease-out group-hover/btn:translate-x-full"
         />
       )}
       <span className="relative z-10 inline-flex items-center justify-center gap-1.5">

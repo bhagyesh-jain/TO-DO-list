@@ -36,9 +36,9 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
   const weeklyRate =
     weeklyPlannedSum > 0 ? Math.round((weeklyCompletedSum / weeklyPlannedSum) * 100) : 0;
 
-  // Dynamic theme gridline & track colors (#27272A dark / #E2E8F0 light)
-  const gridlineColor = isDark ? '#27272A' : '#E2E8F0';
-  const donutTrackStroke = isDark ? '#27272A' : '#E2E8F0';
+  // Dynamic theme hairline gridline & track colors (#2C2A26 Sumi Dark / #E4DFD3 Washi Light)
+  const gridlineColor = isDark ? '#2C2A26' : '#E4DFD3';
+  const donutTrackStroke = isDark ? '#2C2A26' : '#E4DFD3';
 
   // Donut SVG geometry
   const totalTasks = categoryStats.reduce((acc, c) => acc + c.total, 0);
@@ -50,19 +50,19 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
   const donutSegments = categoryStats.map((stat) => {
     const ratio = totalTasks > 0 ? stat.total / totalTasks : 0;
     const dashLength = ratio * circumference;
-    // Deepen accents slightly in Light Mode (#059669 emerald, #4F46E5 indigo)
+    // Washi / Sumi palette: Work -> Vermilion, Health -> Moss/Matcha, Personal -> Warm Ochre
     const themeStroke =
       stat.category === 'Work'
         ? isDark
-          ? '#6366F1'
-          : '#4F46E5'
+          ? '#E85D3F'
+          : '#D94A2B'
         : stat.category === 'Health'
           ? isDark
-            ? '#10B981'
-            : '#059669'
+            ? '#74946A'
+            : '#5B7553'
           : isDark
-            ? '#A855F7'
-            : '#9333EA';
+            ? '#D99B3E'
+            : '#C4842D';
 
     const segment = {
       ...stat,
@@ -96,14 +96,14 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-                <h2 className="font-display text-sm font-semibold text-slate-900 dark:text-zinc-100">
+                <BarChart3 className="h-4 w-4 text-[#D94A2B] dark:text-[#E85D3F]" />
+                <h2 className="font-display text-base font-semibold tracking-tight text-[#23211E] dark:text-[#ECE8DF]">
                   Weekly Completion
                 </h2>
               </div>
-              <p className="text-xs text-slate-600 dark:text-zinc-400">
+              <p className="text-xs text-[#7A756B] dark:text-[#8C877D]">
                 Planned vs. completed tasks over the last 7 days (
-                <span className="font-mono tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+                <span className="font-mono tabular-nums font-medium text-[#5B7553] dark:text-[#74946A]">
                   {weeklyRate}%
                 </span>{' '}
                 weekly completion)
@@ -111,19 +111,19 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
             </div>
 
             {/* Chart Legend */}
-            <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-zinc-400">
+            <div className="flex items-center gap-4 text-xs text-[#7A756B] dark:text-[#8C877D]">
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-xs bg-slate-300 dark:bg-zinc-700" />
+                <span className="h-2.5 w-2.5 rounded-[2px] border border-[#C8C1B2] dark:border-[#3F3C36] bg-[#DCD6C8] dark:bg-[#32302B]" />
                 <span>Planned</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-xs bg-emerald-600 dark:bg-emerald-500" />
+                <span className="h-2.5 w-2.5 rounded-[2px] border border-[#495E42] dark:border-[#88A87E]/40 bg-[#5B7553] dark:bg-[#74946A]" />
                 <span>Completed</span>
               </div>
             </div>
           </div>
 
-          {/* Bar Chart Area with Theme-Aware Gridlines (#27272A dark / #E2E8F0 light) */}
+          {/* Bar Chart Area with Theme-Aware Hairline Gridlines (#2C2A26 dark / #E4DFD3 light) */}
           <div className="relative pt-3">
             {/* Horizontal Reference Gridlines */}
             <div
@@ -155,7 +155,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                     onMouseLeave={() => setHoveredDay(null)}
                     className="group relative flex h-full flex-col items-center justify-end gap-2 cursor-pointer"
                   >
-                    {/* Floating Glassmorphic Bar Tooltip */}
+                    {/* Floating Matte Paper Bar Tooltip */}
                     <AnimatePresence>
                       {isHovered && (
                         <motion.div
@@ -163,13 +163,19 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                           animate={{ opacity: 1, y: 0, scale: 1 }}
                           exit={{ opacity: 0, y: 2, scale: 0.94 }}
                           transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-                          className="pointer-events-none absolute -top-2 z-30 -translate-y-full whitespace-nowrap rounded-lg border border-slate-200/90 dark:border-white/15 bg-white/95 dark:bg-zinc-900/95 px-2.5 py-1 text-[10px] font-mono shadow-md backdrop-blur-xl"
+                          className="pointer-events-none absolute -top-2 z-30 -translate-y-full whitespace-nowrap rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] px-2.5 py-1 text-[10px] font-mono tabular-nums shadow-[0_6px_16px_-4px_rgba(35,33,30,0.16)] dark:shadow-[0_10px_20px_-4px_rgba(0,0,0,0.75)]"
                         >
-                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                          <span
+                            className={`font-semibold ${
+                              day.isToday
+                                ? 'text-[#D94A2B] dark:text-[#E85D3F]'
+                                : 'text-[#5B7553] dark:text-[#74946A]'
+                            }`}
+                          >
                             {day.completed}
                           </span>
-                          <span className="text-slate-400 dark:text-zinc-500"> / </span>
-                          <span className="text-slate-700 dark:text-zinc-300">
+                          <span className="text-[#7A756B] dark:text-[#8C877D]"> / </span>
+                          <span className="text-[#23211E] dark:text-[#ECE8DF]">
                             {day.planned} tasks
                           </span>
                         </motion.div>
@@ -177,37 +183,37 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                     </AnimatePresence>
 
                     {/* Numeric Value Label */}
-                    <div className="font-mono text-[10px] tabular-nums text-slate-500 dark:text-zinc-400 transition-colors group-hover:text-slate-900 dark:group-hover:text-zinc-100">
+                    <div className="font-mono text-[10px] tabular-nums text-[#7A756B] dark:text-[#8C877D] transition-colors group-hover:text-[#23211E] dark:group-hover:text-[#ECE8DF]">
                       {day.completed}/{day.planned}
                     </div>
 
                     {/* Paired Bars Container */}
-                    <div className="flex h-32 w-full max-w-[42px] items-end justify-center gap-1.5 rounded-t-md px-1">
+                    <div className="flex h-32 w-full max-w-[42px] items-end justify-center gap-1.5 rounded-t-sm px-1">
                       {/* Planned Bar */}
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: `${Math.max(8, plannedHeightPct)}%` }}
                         transition={{ type: 'spring', stiffness: 220, damping: 24 }}
                         title={`${day.formattedDate}: ${day.planned} planned`}
-                        className={`w-3.5 rounded-t-sm transition-colors ${
+                        className={`w-3.5 rounded-t-[2px] border-t border-x transition-colors ${
                           isHovered
-                            ? 'bg-slate-400 dark:bg-zinc-600'
-                            : 'bg-slate-300/90 dark:bg-zinc-700/85'
+                            ? 'border-[#B8B0A0] dark:border-[#4A463F] bg-[#CFC8B8] dark:bg-[#3D3A34]'
+                            : 'border-[#CBC4B5] dark:border-[#3A3731] bg-[#DCD6C8] dark:bg-[#32302B]'
                         }`}
                       />
 
-                      {/* Completed Bar */}
+                      {/* Completed Bar (Beveled Keycap Column) */}
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: `${Math.max(6, completedHeightPct)}%` }}
                         transition={{ type: 'spring', stiffness: 240, damping: 22 }}
                         title={`${day.formattedDate}: ${day.completed} completed`}
-                        className={`w-3.5 rounded-t-sm transition-colors ${
+                        className={`w-3.5 rounded-t-[2px] border-t border-x shadow-[inset_0_1px_0_0_rgba(255,255,255,0.28)] transition-colors ${
                           day.isToday
-                            ? 'bg-indigo-600 dark:bg-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.4)]'
+                            ? 'border-[#B83B1F] dark:border-[#C94529] bg-[#D94A2B] dark:bg-[#E85D3F]'
                             : isHovered
-                              ? 'bg-emerald-500 dark:bg-emerald-400'
-                              : 'bg-emerald-600 dark:bg-emerald-500/90'
+                              ? 'border-[#495E42] dark:border-[#88A87E] bg-[#6A8761] dark:bg-[#84A67A]'
+                              : 'border-[#495E42] dark:border-[#5D7855] bg-[#5B7553] dark:bg-[#74946A]'
                         }`}
                       />
                     </div>
@@ -221,15 +227,15 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
               {weeklyData.map((day) => (
                 <div key={day.fullDate} className="flex flex-col items-center">
                   <span
-                    className={`font-mono text-xs ${
+                    className={`font-mono tabular-nums text-xs ${
                       day.isToday
-                        ? 'font-semibold text-indigo-600 dark:text-indigo-400'
-                        : 'text-slate-600 dark:text-zinc-400'
+                        ? 'font-semibold text-[#D94A2B] dark:text-[#E85D3F]'
+                        : 'text-[#23211E] dark:text-[#ECE8DF]'
                     }`}
                   >
                     {day.dayLabel}
                   </span>
-                  <span className="font-mono text-[10px] tabular-nums text-slate-400 dark:text-zinc-500">
+                  <span className="font-mono text-[10px] tabular-nums text-[#7A756B] dark:text-[#8C877D]">
                     {day.isToday ? 'Today' : day.formattedDate}
                   </span>
                 </div>
@@ -237,15 +243,15 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
             </div>
           </div>
 
-          {/* Footer Inspection Readout */}
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 px-3.5 py-2 text-xs transition-colors duration-300">
+          {/* Recessed Footer Inspection Readout */}
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4]/75 dark:bg-[#141311] px-3.5 py-2 text-xs shadow-[inset_0_1px_2px_rgba(35,33,30,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition-colors duration-300">
             {hoveredDay ? (
               <>
-                <span className="font-mono font-medium text-slate-900 dark:text-zinc-200">
+                <span className="font-mono tabular-nums font-medium text-[#23211E] dark:text-[#ECE8DF]">
                   {hoveredDay.dayLabel}, {hoveredDay.formattedDate}
                   {hoveredDay.isToday ? ' (Today)' : ''}
                 </span>
-                <span className="font-mono tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+                <span className="font-mono tabular-nums font-medium text-[#5B7553] dark:text-[#74946A]">
                   {hoveredDay.completed} of {hoveredDay.planned} tasks completed (
                   {hoveredDay.planned > 0
                     ? Math.round((hoveredDay.completed / hoveredDay.planned) * 100)
@@ -255,10 +261,10 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
               </>
             ) : (
               <>
-                <span className="text-slate-600 dark:text-zinc-400">
+                <span className="text-[#7A756B] dark:text-[#8C877D]">
                   7-day total execution summary
                 </span>
-                <span className="font-mono tabular-nums text-slate-900 dark:text-zinc-200">
+                <span className="font-mono tabular-nums text-[#23211E] dark:text-[#ECE8DF]">
                   {weeklyCompletedSum} completed · {weeklyPlannedSum} planned
                 </span>
               </>
@@ -283,12 +289,12 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <h2 className="font-display text-sm font-semibold text-slate-900 dark:text-zinc-100">
+                <PieChart className="h-4 w-4 text-[#5B7553] dark:text-[#74946A]" />
+                <h2 className="font-display text-base font-semibold tracking-tight text-[#23211E] dark:text-[#ECE8DF]">
                   Category Breakdown
                 </h2>
               </div>
-              <p className="text-xs text-slate-600 dark:text-zinc-400">
+              <p className="text-xs text-[#7A756B] dark:text-[#8C877D]">
                 Task concentration across Work, Personal, and Health · Click a category to filter
               </p>
             </div>
@@ -300,7 +306,7 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 onClick={() => onSelectCategoryFromChart('All')}
-                className="whitespace-nowrap shrink-0 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                className="whitespace-nowrap shrink-0 text-xs font-medium text-[#D94A2B] dark:text-[#E85D3F] hover:underline cursor-pointer"
               >
                 Show All Categories
               </motion.button>
@@ -361,25 +367,25 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center">
                 {activeCategoryStat ? (
                   <>
-                    <span className="font-mono text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
+                    <span className="font-mono text-2xl font-semibold tabular-nums text-[#23211E] dark:text-[#ECE8DF]">
                       {activeCategoryStat.percentage}%
                     </span>
-                    <span className="text-xs font-medium text-slate-700 dark:text-zinc-300">
+                    <span className="text-xs font-medium text-[#23211E] dark:text-[#ECE8DF]">
                       {activeCategoryStat.category}
                     </span>
-                    <span className="font-mono text-[10px] tabular-nums text-slate-400 dark:text-zinc-500">
+                    <span className="font-mono text-[10px] tabular-nums text-[#7A756B] dark:text-[#8C877D]">
                       {activeCategoryStat.completed}/{activeCategoryStat.total} done
                     </span>
                   </>
                 ) : (
                   <>
-                    <span className="font-mono text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
+                    <span className="font-mono text-2xl font-semibold tabular-nums text-[#23211E] dark:text-[#ECE8DF]">
                       {totalTasks}
                     </span>
-                    <span className="text-xs text-slate-600 dark:text-zinc-400">
+                    <span className="text-xs text-[#7A756B] dark:text-[#8C877D]">
                       Active Queue
                     </span>
-                    <span className="font-mono text-[10px] tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="font-mono text-[10px] tabular-nums font-medium text-[#5B7553] dark:text-[#74946A]">
                       {totalCompletedTasks} done
                     </span>
                   </>
@@ -398,8 +404,8 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                   <motion.button
                     key={stat.category}
                     type="button"
-                    whileHover={{ scale: 1.015 }}
-                    whileTap={{ scale: 0.97 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                     onMouseEnter={() => setHoveredCategory(stat.category)}
                     onMouseLeave={() => setHoveredCategory(null)}
@@ -408,32 +414,32 @@ export const AnalyticsCharts: React.FC<AnalyticsChartsProps> = ({
                         selectedCategoryFilter === stat.category ? 'All' : stat.category
                       )
                     }
-                    className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 text-left transition-colors cursor-pointer ${
+                    className={`flex items-center justify-between gap-3 rounded-md border px-3 py-2.5 text-left transition-colors cursor-pointer ${
                       isSelected
-                        ? 'border-indigo-500/40 dark:border-white/20 bg-slate-100 dark:bg-zinc-800/90 text-slate-900 dark:text-zinc-100'
-                        : 'border-transparent bg-slate-100/50 dark:bg-zinc-800/35 hover:border-slate-200 dark:hover:border-white/10 hover:bg-slate-100 dark:hover:bg-zinc-800/65 text-slate-700 dark:text-zinc-300'
+                        ? 'border-[#D94A2B]/60 dark:border-[#E85D3F]/60 bg-[#EFECE4] dark:bg-[#262420] text-[#23211E] dark:text-[#ECE8DF] shadow-[0_1px_0_0_rgba(35,33,30,0.08)]'
+                        : 'border-[#E4DFD3] dark:border-[#2C2A26] bg-[#F6F3EC]/70 dark:bg-[#161513]/70 hover:border-[#CFC8B8] dark:hover:border-[#3A3731] hover:bg-[#EFECE4]/80 dark:hover:bg-[#262420]/70 text-[#23211E] dark:text-[#ECE8DF]'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       <span
                         style={{ backgroundColor: stat.themeStroke }}
-                        className="h-3 w-3 shrink-0 rounded-xs"
+                        className="h-3 w-3 shrink-0 rounded-[2px] border border-black/10 dark:border-white/15 shadow-[0_1px_0_0_rgba(0,0,0,0.15)]"
                       />
                       <div>
-                        <div className="text-xs font-semibold text-slate-900 dark:text-zinc-100">
+                        <div className="text-xs font-semibold text-[#23211E] dark:text-[#ECE8DF]">
                           {stat.category}
                         </div>
-                        <div className="font-mono text-[11px] tabular-nums text-slate-600 dark:text-zinc-400">
+                        <div className="font-mono text-[11px] tabular-nums text-[#7A756B] dark:text-[#8C877D]">
                           {stat.completed} of {stat.total} completed ({completionPct}%)
                         </div>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <div className="font-mono text-sm font-semibold tabular-nums text-slate-900 dark:text-zinc-100">
+                      <div className="font-mono text-sm font-semibold tabular-nums text-[#23211E] dark:text-[#ECE8DF]">
                         {stat.percentage}%
                       </div>
-                      <div className="font-mono text-[11px] tabular-nums text-slate-400 dark:text-zinc-500">
+                      <div className="font-mono text-[11px] tabular-nums text-[#7A756B] dark:text-[#8C877D]">
                         share
                       </div>
                     </div>

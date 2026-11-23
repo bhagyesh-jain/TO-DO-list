@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Plus, RotateCcw } from 'lucide-react';
+import { Moon, Plus, RotateCcw, Sun, Volume2, VolumeX } from 'lucide-react';
 import {
   CategoryFilter,
   CategoryStat,
@@ -25,14 +25,93 @@ import { TaskListSection } from './components/TaskListSection';
 import { KeyMetricCards } from './components/KeyMetricCards';
 import { ActivityHeatmap } from './components/ActivityHeatmap';
 import { AnalyticsCharts } from './components/AnalyticsCharts';
+import { MagneticButton } from './components/SpotlightCard';
+import {
+  playTaskAddSound,
+  playTaskCompleteSound,
+  playTaskDeleteSound,
+  playTaskUncheckSound,
+} from './utils/soundEffects';
 
 const STORAGE_KEY_TASKS = 'flowstate_tasks_v1';
 const STORAGE_KEY_HISTORY = 'flowstate_history_v1';
+const STORAGE_KEY_THEME = 'flowstate_theme_v1';
+const STORAGE_KEY_SOUND = 'flowstate_sound_v1';
 
 type WorkspaceMode = 'unified' | 'tasks' | 'analytics';
+type ThemeMode = 'dark' | 'light';
 
 export default function App() {
   const composerInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Dual Washi Light / Sumi Dark Theme State with localStorage + System Preference Detection
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_THEME);
+      if (saved === 'dark' || saved === 'light') {
+        return saved;
+      }
+      if (
+        typeof window !== 'undefined' &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: light)').matches
+      ) {
+        return 'light';
+      }
+    } catch {
+      // Default to dark
+    }
+    return 'dark';
+  });
+
+  const isDark = theme === 'dark';
+
+  // Sync `.dark` class on document.documentElement and persist theme
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY_THEME, theme);
+    } catch {
+      // Ignore storage errors
+    }
+  }, [theme]);
+
+  // Listen to OS system theme changes if user hasn't manually overridden in session
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem(STORAGE_KEY_THEME)) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  // Web Audio API Sound Toggle State
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_SOUND);
+      if (saved !== null) return saved === 'true';
+    } catch {
+      // Default enabled
+    }
+    return true;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_SOUND, String(soundEnabled));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [soundEnabled]);
 
   // Persistent Tasks State
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -66,12 +145,13 @@ export default function App() {
     return generateSeedHistory();
   });
 
-  // UI Filter & View State
+  // UI Filter, View & Sibling Focus State
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('All');
   const [sortMode, setSortMode] = useState<SortMode>('manual');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>('unified');
+  const [focusedWidget, setFocusedWidget] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync to localStorage
@@ -198,16 +278,28 @@ export default function App() {
     return days;
   }, [history, todayCompletedCount, todayPlannedCount]);
 
-  // Compute Category Breakdown Donut Chart data
+  // Compute Category Breakdown Donut Chart data (Vermilion, Ochre, Moss palette)
   const categoryStats: CategoryStat[] = useMemo(() => {
     const categories: {
       cat: TaskCategory;
       color: string;
       strokeColor: string;
     }[] = [
-      { cat: 'Work', color: 'text-indigo-400', strokeColor: '#6366f1' },
-      { cat: 'Personal', color: 'text-violet-400', strokeColor: '#a855f7' },
-      { cat: 'Health', color: 'text-emerald-400', strokeColor: '#10b981' },
+      {
+        cat: 'Work',
+        color: 'text-[#D94A2B] dark:text-[#E85D3F]',
+        strokeColor: isDark ? '#E85D3F' : '#D94A2B',
+      },
+      {
+        cat: 'Personal',
+        color: 'text-[#C4842D] dark:text-[#D99B3E]',
+        strokeColor: isDark ? '#D99B3E' : '#C4842D',
+      },
+      {
+        cat: 'Health',
+        color: 'text-[#5B7553] dark:text-[#74946A]',
+        strokeColor: isDark ? '#74946A' : '#5B7553',
+      },
     ];
 
     const totalAll = tasks.length;
@@ -225,7 +317,7 @@ export default function App() {
         strokeColor,
       };
     });
-  }, [tasks]);
+  }, [tasks, isDark]);
 
   // Handlers
   const handleAddTask = (newTaskInput: {
@@ -248,10 +340,20 @@ export default function App() {
       newTask,
       ...prev.map((item, idx) => ({ ...item, order: idx + 1 })),
     ]);
+    playTaskAddSound(soundEnabled);
     setToastMessage(`Added "${newTask.title}" to ${newTask.category}`);
   };
 
   const handleToggleTask = (id: string) => {
+    const target = tasks.find((t) => t.id === id);
+    if (target) {
+      if (!target.completed) {
+        playTaskCompleteSound(soundEnabled);
+      } else {
+        playTaskUncheckSound(soundEnabled);
+      }
+    }
+
     setTasks((prev) =>
       prev.map((task) => {
         if (task.id !== id) return task;
@@ -268,6 +370,7 @@ export default function App() {
   const handleDeleteTask = (id: string) => {
     const target = tasks.find((t) => t.id === id);
     setTasks((prev) => prev.filter((task) => task.id !== id));
+    playTaskDeleteSound(soundEnabled);
     if (target) {
       setToastMessage(`Removed "${target.title}"`);
     }
@@ -292,6 +395,7 @@ export default function App() {
     const count = tasks.filter((t) => t.completed).length;
     if (count === 0) return;
     setTasks((prev) => prev.filter((t) => !t.completed));
+    playTaskDeleteSound(soundEnabled);
     setToastMessage(`Cleared ${count} completed ${count === 1 ? 'task' : 'tasks'}`);
   };
 
@@ -304,6 +408,7 @@ export default function App() {
     setCategoryFilter('All');
     setSearchQuery('');
     setSortMode('manual');
+    playTaskAddSound(soundEnabled);
     setToastMessage('Restored default 6-month demo dataset');
   };
 
@@ -317,6 +422,10 @@ export default function App() {
     }, 60);
   };
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   const formattedHeaderDate = useMemo(() => {
     return new Date().toLocaleDateString('en-US', {
       weekday: 'long',
@@ -327,15 +436,9 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#070a12] text-slate-100 flex flex-col">
-      {/* Subtle Ambient Background Glow */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-96 bg-gradient-to-b from-indigo-950/25 via-slate-950/10 to-transparent"
-      />
-
-      {/* Top Navigation Bar — Strict 3-Zone Contract */}
-      <header className="sticky top-0 z-30 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
+    <div className="field-journal-grid min-h-screen bg-[#F6F3EC] dark:bg-[#161513] text-[#23211E] dark:text-[#ECE8DF] flex flex-col transition-colors duration-300">
+      {/* Top Navigation Bar — 3-Zone Contract on Matte Washi / Sumi Surface */}
+      <header className="sticky top-0 z-30 border-b border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7]/95 dark:bg-[#1E1D1A]/95 backdrop-blur-md transition-colors duration-300">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-8 px-4 py-3.5 sm:px-6 lg:px-8">
           {/* Zone 1: Single text element Brand wordmark */}
           <a
@@ -344,7 +447,7 @@ export default function App() {
               e.preventDefault();
               setWorkspaceMode('unified');
             }}
-            className="font-display text-lg font-bold tracking-tight text-slate-100 whitespace-nowrap shrink-0"
+            className="font-display text-xl font-semibold tracking-tight text-[#23211E] dark:text-[#ECE8DF] whitespace-nowrap shrink-0"
           >
             FlowState
           </a>
@@ -352,7 +455,7 @@ export default function App() {
           {/* Zone 2: 4 concise single-line text navigation links */}
           <nav
             aria-label="Primary sections"
-            className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400"
+            className="hidden md:flex items-center gap-6 text-sm font-medium text-[#7A756B] dark:text-[#8C877D]"
           >
             <a
               href="#workspace"
@@ -360,8 +463,10 @@ export default function App() {
                 e.preventDefault();
                 setWorkspaceMode('unified');
               }}
-              className={`hover:text-slate-100 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0 ${
-                workspaceMode === 'unified' ? 'text-slate-100' : ''
+              className={`hover:text-[#23211E] dark:hover:text-[#ECE8DF] hover:underline decoration-[#D94A2B] dark:decoration-[#E85D3F] underline-offset-4 transition-colors whitespace-nowrap shrink-0 ${
+                workspaceMode === 'unified'
+                  ? 'text-[#23211E] dark:text-[#ECE8DF] font-semibold underline decoration-[#D94A2B] dark:decoration-[#E85D3F]'
+                  : ''
               }`}
             >
               Unified Dashboard
@@ -372,8 +477,10 @@ export default function App() {
                 e.preventDefault();
                 setWorkspaceMode('tasks');
               }}
-              className={`hover:text-slate-100 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0 ${
-                workspaceMode === 'tasks' ? 'text-slate-100' : ''
+              className={`hover:text-[#23211E] dark:hover:text-[#ECE8DF] hover:underline decoration-[#D94A2B] dark:decoration-[#E85D3F] underline-offset-4 transition-colors whitespace-nowrap shrink-0 ${
+                workspaceMode === 'tasks'
+                  ? 'text-[#23211E] dark:text-[#ECE8DF] font-semibold underline decoration-[#D94A2B] dark:decoration-[#E85D3F]'
+                  : ''
               }`}
             >
               Daily Tasks
@@ -384,8 +491,10 @@ export default function App() {
                 e.preventDefault();
                 setWorkspaceMode('analytics');
               }}
-              className={`hover:text-slate-100 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0 ${
-                workspaceMode === 'analytics' ? 'text-slate-100' : ''
+              className={`hover:text-[#23211E] dark:hover:text-[#ECE8DF] hover:underline decoration-[#D94A2B] dark:decoration-[#E85D3F] underline-offset-4 transition-colors whitespace-nowrap shrink-0 ${
+                workspaceMode === 'analytics'
+                  ? 'text-[#23211E] dark:text-[#ECE8DF] font-semibold underline decoration-[#D94A2B] dark:decoration-[#E85D3F]'
+                  : ''
               }`}
             >
               Analytics & Heatmap
@@ -396,88 +505,176 @@ export default function App() {
                 e.preventDefault();
                 handleResetDemoData();
               }}
-              className="hover:text-indigo-400 hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
+              className="hover:text-[#D94A2B] dark:hover:text-[#E85D3F] hover:underline underline-offset-4 transition-colors whitespace-nowrap shrink-0"
             >
               Reset Demo
             </a>
           </nav>
 
-          {/* Zone 3: 1 primary action */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
+          {/* Zone 3: Tactile Rocker Theme Toggle + Unified Hardware Primary Action */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Tactile Mechanical Rocker Switch for Washi Light / Sumi Dark */}
+            <motion.button
               type="button"
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 24 }}
+              onClick={toggleTheme}
+              aria-label={
+                isDark ? 'Switch to Washi Light Mode' : 'Switch to Sumi Dark Mode'
+              }
+              title={isDark ? 'Switch to Washi Light Mode' : 'Switch to Sumi Dark Mode'}
+              className="relative inline-flex items-center gap-1 rounded-md border border-[#D5CFC0] dark:border-[#3A3731] bg-[#EFECE4] dark:bg-[#141311] p-1 text-xs font-medium shadow-[inset_0_1px_2px_rgba(35,33,30,0.1)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.65)] cursor-pointer select-none"
+            >
+              {/* Washi Light Pole */}
+              <span
+                className={`relative z-10 inline-flex items-center gap-1 rounded-[4px] px-2 py-1 transition-colors ${
+                  !isDark
+                    ? 'text-[#23211E] font-semibold'
+                    : 'text-[#8C877D]'
+                }`}
+              >
+                {!isDark && (
+                  <motion.span
+                    layoutId="theme-rocker-actuator"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    className=" -z-10 absolute inset-0 rounded-[4px] border border-[#D5CFC0] bg-[#FCFBF7] shadow-[0_1px_0_0_rgba(35,33,30,0.16),inset_0_1px_0_0_rgba(255,255,255,0.9)]"
+                  />
+                )}
+                <Sun
+                  className={`h-3.5 w-3.5 ${
+                    !isDark ? 'text-[#D94A2B]' : 'text-[#8C877D]'
+                  }`}
+                />
+                <span className="hidden sm:inline">Light</span>
+              </span>
+
+              {/* Sumi Dark Pole */}
+              <span
+                className={`relative z-10 inline-flex items-center gap-1 rounded-[4px] px-2 py-1 transition-colors ${
+                  isDark
+                    ? 'text-[#ECE8DF] font-semibold'
+                    : 'text-[#7A756B]'
+                }`}
+              >
+                {isDark && (
+                  <motion.span
+                    layoutId="theme-rocker-actuator"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    className="-z-10 absolute inset-0 rounded-[4px] border border-[#3A3731] bg-[#262420] shadow-[0_1px_0_0_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+                  />
+                )}
+                <Moon
+                  className={`h-3.5 w-3.5 ${
+                    isDark ? 'text-[#E85D3F]' : 'text-[#7A756B]'
+                  }`}
+                />
+                <span className="hidden sm:inline">Dark</span>
+              </span>
+            </motion.button>
+
+            {/* Unified Primary Hardware Button (+ New Task) */}
+            <MagneticButton
+              type="button"
+              withShimmer={true}
+              magneticStrength={0.18}
               onClick={handleFocusComposer}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm transition-colors hover:bg-indigo-500 whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-md border border-[#B83B1F] dark:border-[#C94529] bg-[#D94A2B] dark:bg-[#E85D3F] px-3.5 py-2 text-xs font-medium text-[#FCFBF7] shadow-[0_2px_0_0_#9E3119,inset_0_1px_0_0_rgba(255,255,255,0.24)] dark:shadow-[0_2px_0_0_#A3341B,inset_0_1px_0_0_rgba(255,255,255,0.22)] transition-colors hover:bg-[#C43F22] dark:hover:bg-[#F0684B] whitespace-nowrap shrink-0"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>New Task</span>
-            </button>
+            </MagneticButton>
           </div>
         </div>
       </header>
 
       {/* Main Workspace Container */}
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        {/* Workspace Context Sub-Header & View Switcher */}
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-slate-800/70 pb-4">
+        {/* Workspace Context Sub-Header & Recessed Sliding View Switcher */}
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-[#E4DFD3] dark:border-[#2C2A26] pb-4 transition-colors duration-300">
           <div>
-            <p className="font-mono text-xs text-indigo-400">{formattedHeaderDate}</p>
-            <h1 className="mt-0.5 font-display text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
+            <p className="font-display italic text-sm text-[#D94A2B] dark:text-[#E85D3F]">
+              {formattedHeaderDate}
+            </p>
+            <h1 className="mt-0.5 font-display text-2xl font-semibold tracking-tight text-[#23211E] dark:text-[#ECE8DF] sm:text-3xl">
               Personal Execution & Consistency
             </h1>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Workspace Layout Switcher */}
+            {/* Recessed Hardware Filter Track for Workspace Layout Switcher */}
             <div
               role="group"
               aria-label="Select workspace view mode"
-              className="flex items-center gap-1 rounded-lg border border-slate-800/80 bg-slate-900/80 p-1 text-xs"
+              className="flex items-center gap-1 rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4] dark:bg-[#141311] p-1 text-xs shadow-[inset_0_1px_2px_rgba(35,33,30,0.06)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition-colors duration-300"
             >
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode('unified')}
-                className={`whitespace-nowrap shrink-0 rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                  workspaceMode === 'unified'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Split View
-              </button>
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode('tasks')}
-                className={`whitespace-nowrap shrink-0 rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                  workspaceMode === 'tasks'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Focus Tasks
-              </button>
-              <button
-                type="button"
-                onClick={() => setWorkspaceMode('analytics')}
-                className={`whitespace-nowrap shrink-0 rounded-md px-3 py-1 font-medium transition-colors cursor-pointer ${
-                  workspaceMode === 'analytics'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                Full Analytics
-              </button>
+              {(
+                [
+                  { id: 'unified', label: 'Split View' },
+                  { id: 'tasks', label: 'Focus Tasks' },
+                  { id: 'analytics', label: 'Full Analytics' },
+                ] as const
+              ).map((tab) => {
+                const active = workspaceMode === tab.id;
+                return (
+                  <motion.button
+                    key={tab.id}
+                    type="button"
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                    onClick={() => setWorkspaceMode(tab.id)}
+                    className={`relative whitespace-nowrap shrink-0 rounded-[4px] px-3 py-1 font-medium transition-colors cursor-pointer ${
+                      active
+                        ? 'text-[#FCFBF7]'
+                        : 'text-[#7A756B] hover:text-[#23211E] dark:text-[#8C877D] dark:hover:text-[#ECE8DF]'
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="workspace-mode-pill"
+                        transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+                        className="absolute inset-0 rounded-[4px] border border-[#B83B1F] dark:border-[#C94529] bg-[#D94A2B] dark:bg-[#E85D3F] shadow-[0_1px_0_0_#9E3119,inset_0_1px_0_0_rgba(255,255,255,0.22)]"
+                      />
+                    )}
+                    <span className="relative z-10">{tab.label}</span>
+                  </motion.button>
+                );
+              })}
             </div>
 
-            <button
+            {/* Tactile Sound Effects Toggle */}
+            <MagneticButton
               type="button"
+              magneticStrength={0.16}
+              onClick={() => setSoundEnabled((prev) => !prev)}
+              title={
+                soundEnabled
+                  ? 'Tactile UI sounds enabled (Click to mute)'
+                  : 'Tactile UI sounds muted (Click to enable)'
+              }
+              aria-label={
+                soundEnabled ? 'Mute UI sound effects' : 'Enable UI sound effects'
+              }
+              className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] px-3 py-1.5 text-xs font-medium text-[#23211E] dark:text-[#ECE8DF] shadow-[0_1px_0_0_rgba(35,33,30,0.08)] dark:shadow-[0_1px_0_0_rgba(0,0,0,0.6)] transition-colors hover:border-[#D94A2B]/60 dark:hover:border-[#E85D3F]/60"
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-3.5 w-3.5 text-[#5B7553] dark:text-[#74946A]" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5 text-[#7A756B] dark:text-[#8C877D]" />
+              )}
+              <span>{soundEnabled ? 'SFX On' : 'SFX Off'}</span>
+            </MagneticButton>
+
+            <MagneticButton
+              type="button"
+              magneticStrength={0.16}
               onClick={handleResetDemoData}
               title="Restore default 6-month history and tasks"
-              className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-slate-700 hover:text-white cursor-pointer"
+              className="inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] px-3 py-1.5 text-xs font-medium text-[#23211E] dark:text-[#ECE8DF] shadow-[0_1px_0_0_rgba(35,33,30,0.08)] dark:shadow-[0_1px_0_0_rgba(0,0,0,0.6)] transition-colors hover:border-[#D94A2B]/60 dark:hover:border-[#E85D3F]/60"
             >
-              <RotateCcw className="h-3.5 w-3.5 text-slate-400" />
+              <RotateCcw className="h-3.5 w-3.5 text-[#7A756B] dark:text-[#8C877D]" />
               <span>Reset Seed Data</span>
-            </button>
+            </MagneticButton>
           </div>
         </div>
 
@@ -498,11 +695,15 @@ export default function App() {
                   todayTasks={todayTasks}
                   allTasks={tasks}
                   currentStreak={currentStreak}
+                  isDark={isDark}
+                  isDimmed={focusedWidget !== null && focusedWidget.startsWith('chart-')}
                 />
 
                 <TaskComposer
                   onAddTask={handleAddTask}
                   inputRef={composerInputRef}
+                  isDark={isDark}
+                  isDimmed={focusedWidget !== null && focusedWidget.startsWith('chart-')}
                 />
 
                 <TaskListSection
@@ -521,6 +722,8 @@ export default function App() {
                   onReorderTasks={handleReorderTasks}
                   onClearCompleted={handleClearCompleted}
                   onFocusComposer={handleFocusComposer}
+                  isDark={isDark}
+                  isDimmed={focusedWidget !== null && focusedWidget.startsWith('chart-')}
                 />
               </div>
 
@@ -531,12 +734,19 @@ export default function App() {
                   completionRate={completionRate}
                   totalTasksDone={totalTasksDone}
                   sixMonthPlannedTotal={sixMonthPlannedTotal}
+                  isDark={isDark}
+                  focusedWidget={focusedWidget}
+                  onFocusWidget={setFocusedWidget}
                 />
 
                 <ActivityHeatmap
                   history={history}
                   todayCompletedCount={todayCompletedCount}
                   todayPlannedCount={todayPlannedCount}
+                  isDark={isDark}
+                  isDimmed={focusedWidget !== null && focusedWidget !== 'chart-heatmap'}
+                  onMouseEnterCard={() => setFocusedWidget('chart-heatmap')}
+                  onMouseLeaveCard={() => setFocusedWidget(null)}
                 />
 
                 <AnalyticsCharts
@@ -544,6 +754,9 @@ export default function App() {
                   categoryStats={categoryStats}
                   selectedCategoryFilter={categoryFilter}
                   onSelectCategoryFromChart={(cat) => setCategoryFilter(cat)}
+                  isDark={isDark}
+                  focusedWidget={focusedWidget}
+                  onFocusWidget={setFocusedWidget}
                 />
               </div>
             </motion.div>
@@ -562,11 +775,13 @@ export default function App() {
                 todayTasks={todayTasks}
                 allTasks={tasks}
                 currentStreak={currentStreak}
+                isDark={isDark}
               />
 
               <TaskComposer
                 onAddTask={handleAddTask}
                 inputRef={composerInputRef}
+                isDark={isDark}
               />
 
               <TaskListSection
@@ -585,6 +800,7 @@ export default function App() {
                 onReorderTasks={handleReorderTasks}
                 onClearCompleted={handleClearCompleted}
                 onFocusComposer={handleFocusComposer}
+                isDark={isDark}
               />
             </motion.div>
           )}
@@ -603,12 +819,19 @@ export default function App() {
                 completionRate={completionRate}
                 totalTasksDone={totalTasksDone}
                 sixMonthPlannedTotal={sixMonthPlannedTotal}
+                isDark={isDark}
+                focusedWidget={focusedWidget}
+                onFocusWidget={setFocusedWidget}
               />
 
               <ActivityHeatmap
                 history={history}
                 todayCompletedCount={todayCompletedCount}
                 todayPlannedCount={todayPlannedCount}
+                isDark={isDark}
+                isDimmed={focusedWidget !== null && focusedWidget !== 'chart-heatmap'}
+                onMouseEnterCard={() => setFocusedWidget('chart-heatmap')}
+                onMouseLeaveCard={() => setFocusedWidget(null)}
               />
 
               <AnalyticsCharts
@@ -619,13 +842,16 @@ export default function App() {
                   setCategoryFilter(cat);
                   setWorkspaceMode('unified');
                 }}
+                isDark={isDark}
+                focusedWidget={focusedWidget}
+                onFocusWidget={setFocusedWidget}
               />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      {/* Non-intrusive Toast Notification */}
+      {/* Non-intrusive Field Journal Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
@@ -634,7 +860,7 @@ export default function App() {
             exit={{ opacity: 0, y: 12, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
             role="status"
-            className="fixed bottom-5 right-5 z-50 rounded-lg border border-slate-700/80 bg-slate-900/95 px-4 py-2.5 text-xs font-medium text-slate-100 shadow-lg backdrop-blur-md"
+            className="fixed bottom-5 right-5 z-50 rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] px-4 py-2.5 text-xs font-medium text-[#23211E] dark:text-[#ECE8DF] shadow-[0_10px_24px_-4px_rgba(35,33,30,0.18)] dark:shadow-[0_12px_28px_-4px_rgba(0,0,0,0.8)]"
           >
             {toastMessage}
           </motion.div>
@@ -642,10 +868,14 @@ export default function App() {
       </AnimatePresence>
 
       {/* Quiet Footer */}
-      <footer className="mt-12 border-t border-slate-900 py-5 text-center text-xs text-slate-500">
+      <footer className="mt-12 border-t border-[#E4DFD3] dark:border-[#2C2A26] py-5 text-center text-xs text-[#7A756B] dark:text-[#8C877D] transition-colors duration-300">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <span>FlowState Personal Productivity Workspace</span>
-          <span>Changes saved automatically to browser storage</span>
+          <span className="font-display italic text-sm text-[#23211E] dark:text-[#ECE8DF]">
+            FlowState Field Journal & Tactile Execution Timer
+          </span>
+          <span className="font-mono text-[11px]">
+            Changes & theme saved automatically to local storage
+          </span>
         </div>
       </footer>
     </div>

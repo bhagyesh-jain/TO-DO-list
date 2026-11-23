@@ -3,14 +3,14 @@
 
 @layer base {
   :root {
-    --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
-    --font-sans: 'DM Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    --font-display: 'Newsreader', 'Instrument Serif', Georgia, Cambria, serif;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   }
 
   body {
     font-family: var(--font-sans);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.005em;
     overflow-x: hidden;
   }
 
@@ -24,7 +24,18 @@
   }
 }
 
-/* Custom sleek theme-aware scrollbar */
+/* Hobonichi 5mm Field Journal Dot Grid Overlay (opacity ~0.04) */
+.field-journal-grid {
+  background-image: radial-gradient(rgba(35, 33, 30, 0.065) 1px, transparent 1px);
+  background-size: 19px 19px;
+}
+
+.dark .field-journal-grid {
+  background-image: radial-gradient(rgba(236, 232, 223, 0.045) 1px, transparent 1px);
+  background-size: 19px 19px;
+}
+
+/* Custom Washi / Sumi Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -35,14 +46,14 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.45);
+  background: rgba(122, 117, 107, 0.35);
   border-radius: 3px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: rgba(63, 63, 70, 0.75);
+  background: rgba(140, 135, 125, 0.35);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.65);
+  background: rgba(217, 74, 43, 0.65);
 }

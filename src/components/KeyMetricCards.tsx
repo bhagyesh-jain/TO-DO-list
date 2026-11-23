@@ -37,9 +37,9 @@ export const KeyMetricCards: React.FC<KeyMetricCardsProps> = ({
         className="p-4 overflow-hidden"
       >
         <div className="flex h-full flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+          <div className="flex items-center justify-between text-[#7A756B] dark:text-[#8C877D]">
             <span className="text-xs font-medium">Current Streak</span>
-            <Flame className="h-4 w-4 text-amber-500 dark:text-amber-400" />
+            <Flame className="h-4 w-4 text-[#D94A2B] dark:text-[#E85D3F]" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <motion.span
@@ -47,15 +47,15 @@ export const KeyMetricCards: React.FC<KeyMetricCardsProps> = ({
               initial={{ y: -6, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="font-mono text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100"
+              className="font-mono text-2xl font-semibold tabular-nums text-[#23211E] dark:text-[#ECE8DF]"
             >
               {currentStreak}
             </motion.span>
-            <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+            <span className="font-mono text-xs font-medium text-[#D94A2B] dark:text-[#E85D3F]">
               days
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] text-slate-400 dark:text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-[#7A756B] dark:text-[#8C877D]">
             Consecutive active days
           </p>
         </div>
@@ -71,9 +71,9 @@ export const KeyMetricCards: React.FC<KeyMetricCardsProps> = ({
         className="p-4 overflow-hidden"
       >
         <div className="flex h-full flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+          <div className="flex items-center justify-between text-[#7A756B] dark:text-[#8C877D]">
             <span className="text-xs font-medium">Completion Rate</span>
-            <Award className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            <Award className="h-4 w-4 text-[#5B7553] dark:text-[#74946A]" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <motion.span
@@ -81,16 +81,16 @@ export const KeyMetricCards: React.FC<KeyMetricCardsProps> = ({
               initial={{ y: -6, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="font-mono text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100"
+              className="font-mono text-2xl font-semibold tabular-nums text-[#23211E] dark:text-[#ECE8DF]"
             >
               {completionRate}%
             </motion.span>
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="font-mono text-xs font-medium text-[#5B7553] dark:text-[#74946A]">
               consistency
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] text-slate-400 dark:text-zinc-500">
-            Across {sixMonthPlannedTotal.toLocaleString()} scheduled tasks
+          <p className="mt-1.5 text-[11px] text-[#7A756B] dark:text-[#8C877D]">
+            Across <span className="font-mono tabular-nums">{sixMonthPlannedTotal.toLocaleString()}</span> scheduled tasks
           </p>
         </div>
       </SpotlightCard>
@@ -105,9 +105,9 @@ export const KeyMetricCards: React.FC<KeyMetricCardsProps> = ({
         className="p-4 overflow-hidden"
       >
         <div className="flex h-full flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-600 dark:text-zinc-400">
+          <div className="flex items-center justify-between text-[#7A756B] dark:text-[#8C877D]">
             <span className="text-xs font-medium">Total Tasks Done</span>
-            <CheckCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <CheckCheck className="h-4 w-4 text-[#5B7553] dark:text-[#74946A]" />
           </div>
           <div className="mt-3 flex items-baseline gap-1.5">
             <motion.span
@@ -115,15 +115,15 @@ export const KeyMetricCards: React.FC<KeyMetricCardsProps> = ({
               initial={{ y: -6, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="font-mono text-2xl font-semibold tabular-nums text-slate-900 dark:text-zinc-100"
+              className="font-mono text-2xl font-semibold tabular-nums text-[#23211E] dark:text-[#ECE8DF]"
             >
               {totalTasksDone.toLocaleString()}
             </motion.span>
-            <span className="text-xs text-slate-600 dark:text-zinc-400">
+            <span className="text-xs text-[#7A756B] dark:text-[#8C877D]">
               completed
             </span>
           </div>
-          <p className="mt-1.5 text-[11px] text-slate-400 dark:text-zinc-500">
+          <p className="mt-1.5 text-[11px] text-[#7A756B] dark:text-[#8C877D]">
             Past 6 months + today
           </p>
         </div>

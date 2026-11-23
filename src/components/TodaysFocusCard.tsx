@@ -39,24 +39,18 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
       isDimmed={isDimmed}
       onMouseEnterCard={onMouseEnterCard}
       onMouseLeaveCard={onMouseLeaveCard}
-      className="p-5 overflow-hidden"
+      className="p-6 overflow-hidden"
     >
-      {/* Subtle ambient top highlight */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-24 left-1/4 h-48 w-96 rounded-full bg-emerald-500/10 blur-3xl"
-      />
-
       <div className="relative flex flex-col gap-4">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              <h2 className="font-display text-base font-semibold tracking-tight text-slate-900 dark:text-zinc-100">
+              <Target className="h-4 w-4 text-[#D94A2B] dark:text-[#E85D3F]" />
+              <h2 className="font-display text-xl font-medium tracking-tight text-[#23211E] dark:text-[#ECE8DF]">
                 Today&apos;s Focus
               </h2>
             </div>
-            <p className="text-xs text-slate-600 dark:text-zinc-400">
+            <p className="text-xs text-[#7A756B] dark:text-[#8C877D]">
               {completedToday === totalToday && totalToday > 0
                 ? 'All scheduled focus tasks completed for today.'
                 : remainingHighPriority > 0
@@ -73,49 +67,44 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
                   initial={{ y: -5, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  className="font-mono text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400"
+                  className="font-mono text-2xl font-semibold tabular-nums text-[#5B7553] dark:text-[#74946A]"
                 >
                   {progressPercent}%
                 </motion.span>
-                <span className="font-mono text-xs tabular-nums text-slate-600 dark:text-zinc-400">
+                <span className="font-mono text-xs tabular-nums text-[#7A756B] dark:text-[#8C877D]">
                   ({completedToday}/{totalToday})
                 </span>
               </div>
-              <span className="block text-[11px] text-slate-400 dark:text-zinc-500">
+              <span className="block text-[11px] text-[#7A756B] dark:text-[#8C877D]">
                 Daily Completion
               </span>
             </div>
           </div>
         </div>
 
-        {/* Spring-animated progress bar track */}
-        <div className="space-y-2">
+        {/* Recessed Hardware Track + Calm Moss/Matcha Spring Progress Bar */}
+        <div className="space-y-2.5">
           <div
             role="progressbar"
             aria-valuenow={progressPercent}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Today's task completion progress"
-            className="h-2.5 w-full overflow-hidden rounded-full border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 p-0.5 shadow-inner transition-colors duration-300"
+            className="h-3 w-full overflow-hidden rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4] dark:bg-[#141311] p-0.5 shadow-[inset_0_1px_2px_rgba(35,33,30,0.1)] dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.65)] transition-colors duration-300"
           >
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ type: 'spring', stiffness: 160, damping: 24 }}
-              className="relative h-full overflow-hidden rounded-full bg-gradient-to-r from-indigo-600 via-emerald-600 to-emerald-500 dark:from-indigo-500 dark:via-emerald-500 dark:to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.35)]"
-            >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-60"
-              />
-            </motion.div>
+              className="relative h-full overflow-hidden rounded-[3px] bg-[#5B7553] dark:bg-[#74946A] shadow-[inset_0_1px_0_rgba(255,255,255,0.22)]"
+            />
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 dark:text-zinc-400">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-[#7A756B] dark:text-[#8C877D]">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-slate-800 dark:text-zinc-300">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span className="font-mono tabular-nums">{completedToday}</span> completed
+              <span className="inline-flex items-center gap-1.5 text-[#23211E] dark:text-[#ECE8DF]">
+                <CheckCircle2 className="h-3.5 w-3.5 text-[#5B7553] dark:text-[#74946A]" />
+                <span className="font-mono tabular-nums font-medium">{completedToday}</span> completed
               </span>
               <span aria-hidden="true">·</span>
               <span>
@@ -126,10 +115,12 @@ export const TodaysFocusCard: React.FC<TodaysFocusCardProps> = ({
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 text-slate-800 dark:text-zinc-300">
-              <Flame className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
-              <span className="font-mono tabular-nums font-medium">{currentStreak}d</span>
-              <span className="text-slate-600 dark:text-zinc-400">active streak</span>
+            <div className="flex items-center gap-1.5 text-[#23211E] dark:text-[#ECE8DF]">
+              <Flame className="h-3.5 w-3.5 text-[#D94A2B] dark:text-[#E85D3F]" />
+              <span className="font-mono tabular-nums font-semibold text-[#D94A2B] dark:text-[#E85D3F]">
+                {currentStreak}d
+              </span>
+              <span className="text-[#7A756B] dark:text-[#8C877D]">active streak</span>
             </div>
           </div>
         </div>

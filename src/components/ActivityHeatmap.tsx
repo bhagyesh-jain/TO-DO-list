@@ -32,9 +32,9 @@ interface TooltipCoords {
   y: number;
 }
 
-// 5-tier color scale mapped from #18181B -> #10B981 in Dark Mode and #F1F5F9 -> #059669 in Light Mode
-const DARK_HEATMAP_SCALE = ['#18181B', '#064E3B', '#047857', '#059669', '#10B981'];
-const LIGHT_HEATMAP_SCALE = ['#F1F5F9', '#A7F3D0', '#34D399', '#10B981', '#059669'];
+// 5-tier color scale mapped through Moss / Matcha Growth Accent (#5B7553 in Light Washi, #74946A in Dark Sumi)
+const LIGHT_HEATMAP_SCALE = ['#EFECE4', '#C8D6C2', '#9BB593', '#77966E', '#5B7553'];
+const DARK_HEATMAP_SCALE = ['#161513', '#2B3528', '#41523B', '#597251', '#74946A'];
 
 export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
   history,
@@ -128,7 +128,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
 
   const getCellFillColor = (cell: HeatmapCell): string => {
     if (cell.isFuture) {
-      return isDark ? 'rgba(24, 24, 27, 0.35)' : 'rgba(241, 245, 249, 0.5)';
+      return isDark ? 'rgba(22, 21, 19, 0.45)' : 'rgba(239, 236, 228, 0.55)';
     }
     const count = cell.completedCount;
     if (count === 0) return scaleColors[0];
@@ -181,7 +181,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
       className="p-5"
     >
       <div ref={containerRef} className="relative flex flex-col gap-4">
-        {/* Floating Glassmorphic Tooltip above hovered heatmap cell */}
+        {/* Floating Field Journal Tooltip above hovered keycap cell */}
         <AnimatePresence>
           {hoveredCell && tooltipCoords && (
             <motion.div
@@ -194,20 +194,20 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                 left: `${tooltipCoords.x}px`,
                 top: `${Math.max(8, tooltipCoords.y - 10)}px`,
               }}
-              className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-lg border border-slate-200/90 dark:border-white/15 bg-white/95 dark:bg-zinc-900/95 px-3 py-1.5 text-[11px] shadow-[0_8px_24px_-4px_rgba(15,23,42,0.18)] dark:shadow-[0_12px_28px_-4px_rgba(0,0,0,0.75)] backdrop-blur-xl"
+              className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#FCFBF7] dark:bg-[#1E1D1A] px-3 py-1.5 text-[11px] shadow-[0_8px_20px_-4px_rgba(35,33,30,0.16)] dark:shadow-[0_12px_24px_-4px_rgba(0,0,0,0.75)]"
             >
-              <div className="flex items-center gap-1.5 font-mono font-semibold text-slate-900 dark:text-zinc-100">
+              <div className="flex items-center gap-1.5 font-mono tabular-nums font-semibold text-[#23211E] dark:text-[#ECE8DF]">
                 <span>
                   {hoveredCell.completedCount}{' '}
                   {hoveredCell.completedCount === 1 ? 'task' : 'tasks'}
                 </span>
-                <span className="text-slate-400 dark:text-zinc-500">·</span>
-                <span className="font-normal text-slate-600 dark:text-zinc-300">
+                <span className="text-[#7A756B] dark:text-[#8C877D]">·</span>
+                <span className="font-normal text-[#7A756B] dark:text-[#8C877D]">
                   {formatFullTooltipDate(hoveredCell.date)}
                   {hoveredCell.isToday ? ' (Today)' : ''}
                 </span>
               </div>
-              <div className="text-[10px] text-emerald-600 dark:text-emerald-400">
+              <div className="text-[10px] font-medium text-[#5B7553] dark:text-[#74946A]">
                 {getIntensityLabel(hoveredCell.completedCount)}
               </div>
             </motion.div>
@@ -218,32 +218,32 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-              <h2 className="font-display text-sm font-semibold text-slate-900 dark:text-zinc-100">
+              <CalendarDays className="h-4 w-4 text-[#5B7553] dark:text-[#74946A]" />
+              <h2 className="font-display text-base font-semibold tracking-tight text-[#23211E] dark:text-[#ECE8DF]">
                 6-Month Activity Heatmap
               </h2>
             </div>
-            <p className="text-xs text-slate-600 dark:text-zinc-400">
-              <span className="font-mono tabular-nums font-medium text-slate-900 dark:text-zinc-200">
+            <p className="text-xs text-[#7A756B] dark:text-[#8C877D]">
+              <span className="font-mono tabular-nums font-medium text-[#23211E] dark:text-[#ECE8DF]">
                 {totalSixMonthCompletions.toLocaleString()}
               </span>{' '}
               tasks completed across{' '}
-              <span className="font-mono tabular-nums font-medium text-slate-900 dark:text-zinc-200">
+              <span className="font-mono tabular-nums font-medium text-[#23211E] dark:text-[#ECE8DF]">
                 {activeDaysCount}
               </span>{' '}
               active days in the last 26 weeks
             </p>
           </div>
 
-          {/* 5-Tier Intensity Scale Legend */}
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-zinc-400">
+          {/* 5-Tier Beveled Keycap Intensity Legend */}
+          <div className="flex items-center gap-1.5 text-[11px] text-[#7A756B] dark:text-[#8C877D]">
             <span>Less</span>
             {scaleColors.map((hex, idx) => (
               <span
                 key={hex}
                 title={`Level ${idx}`}
                 style={{ backgroundColor: hex }}
-                className="h-3 w-3 rounded-[3px] border border-slate-300/70 dark:border-white/10 transition-colors duration-300"
+                className="h-3 w-3 rounded-[3px] border border-[#D5CFC0] dark:border-[#33312C] shadow-[0_1px_0_0_rgba(35,33,30,0.12),inset_0_1px_0_0_rgba(255,255,255,0.22)] dark:shadow-[0_1px_0_0_rgba(0,0,0,0.65),inset_0_1px_0_0_rgba(255,255,255,0.07)] transition-colors duration-300"
               />
             ))}
             <span>More</span>
@@ -254,13 +254,13 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
         <div className="overflow-x-auto pb-1">
           <div className="min-w-[520px]">
             {/* Month Labels Row */}
-            <div className="mb-1.5 flex pl-8 text-[11px] text-slate-400 dark:text-zinc-500">
+            <div className="mb-1.5 flex pl-8 text-[11px] text-[#7A756B] dark:text-[#8C877D]">
               <div className="relative h-4 w-full">
                 {monthHeaders.map((m) => (
                   <span
                     key={`${m.label}-${m.weekIndex}`}
                     style={{ left: `${(m.weekIndex / weeks.length) * 100}%` }}
-                    className="absolute top-0 whitespace-nowrap font-mono text-[11px]"
+                    className="absolute top-0 whitespace-nowrap font-mono tabular-nums text-[11px]"
                   >
                     {m.label}
                   </span>
@@ -270,7 +270,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
 
             <div className="flex items-start gap-2">
               {/* Day-of-week labels */}
-              <div className="grid grid-rows-7 gap-1.5 pr-1 text-[10px] font-mono text-slate-400 dark:text-zinc-500">
+              <div className="grid grid-rows-7 gap-1.5 pr-1 text-[10px] font-mono tabular-nums text-[#7A756B] dark:text-[#8C877D]">
                 <span className="h-3.5 leading-3.5 opacity-0">Sun</span>
                 <span className="h-3.5 leading-3.5">Mon</span>
                 <span className="h-3.5 leading-3.5 opacity-0">Tue</span>
@@ -280,7 +280,7 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                 <span className="h-3.5 leading-3.5 opacity-0">Sat</span>
               </div>
 
-              {/* 26 Week Columns */}
+              {/* 26 Week Columns — Beveled Keycap Cells */}
               <div className="grid flex-1 grid-cols-26 gap-1.5">
                 {weeks.map((week, wIdx) => (
                   <div key={wIdx} className="grid grid-rows-7 gap-1.5">
@@ -292,19 +292,19 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
                           key={cell.date}
                           type="button"
                           disabled={cell.isFuture}
-                          whileHover={cell.isFuture ? undefined : { scale: 1.25 }}
-                          whileTap={cell.isFuture ? undefined : { scale: 0.95 }}
-                          transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                          whileHover={cell.isFuture ? undefined : { scale: 1.22, y: -1 }}
+                          whileTap={cell.isFuture ? undefined : { scale: 0.92 }}
+                          transition={{ type: 'spring', stiffness: 420, damping: 25 }}
                           onMouseEnter={(e) => handleCellEnter(cell, e)}
                           onFocus={(e) => handleCellEnter(cell, e)}
                           onMouseLeave={handleCellLeave}
                           aria-label={`${formatFullTooltipDate(cell.date)}: ${cell.completedCount} tasks completed`}
                           style={{ backgroundColor: fillHex }}
-                          className={`relative h-3.5 w-full rounded-[3px] border border-slate-300/60 dark:border-white/[0.08] transition-colors duration-200 ${
+                          className={`relative h-3.5 w-full rounded-[3px] border border-[#D5CFC0]/80 dark:border-[#2C2A26] shadow-[0_1px_0_0_rgba(35,33,30,0.14),inset_0_1px_0_0_rgba(255,255,255,0.25)] dark:shadow-[0_1px_0_0_rgba(0,0,0,0.7),inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-colors duration-200 ${
                             cell.isToday
-                              ? 'ring-2 ring-indigo-600 dark:ring-indigo-400 ring-offset-1 ring-offset-white dark:ring-offset-zinc-900 z-10'
+                              ? 'ring-2 ring-[#D94A2B] dark:ring-[#E85D3F] ring-offset-1 ring-offset-[#FCFBF7] dark:ring-offset-[#1E1D1A] z-10'
                               : isSelected
-                                ? 'ring-1 ring-slate-900 dark:ring-white z-20'
+                                ? 'ring-1 ring-[#23211E] dark:ring-[#ECE8DF] z-20'
                                 : ''
                           } ${
                             cell.isFuture
@@ -321,35 +321,35 @@ export const ActivityHeatmap: React.FC<ActivityHeatmapProps> = ({
           </div>
         </div>
 
-        {/* Status Summary Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200/80 dark:border-white/10 bg-slate-100/70 dark:bg-zinc-800/50 px-3.5 py-2.5 text-xs transition-colors duration-300">
+        {/* Recessed Status Summary Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-[#E4DFD3] dark:border-[#2C2A26] bg-[#EFECE4]/75 dark:bg-[#141311] px-3.5 py-2.5 text-xs shadow-[inset_0_1px_2px_rgba(35,33,30,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)] transition-colors duration-300">
           {hoveredCell ? (
             <>
               <div className="flex items-center gap-2">
-                <span className="font-mono font-medium text-slate-900 dark:text-zinc-100">
+                <span className="font-mono tabular-nums font-medium text-[#23211E] dark:text-[#ECE8DF]">
                   {formatFullTooltipDate(hoveredCell.date)}
                   {hoveredCell.isToday ? ' (Today — Live)' : ''}
                 </span>
-                <span aria-hidden="true" className="text-slate-400 dark:text-zinc-500">
+                <span aria-hidden="true" className="text-[#7A756B] dark:text-[#8C877D]">
                   ·
                 </span>
-                <span className="text-slate-600 dark:text-zinc-400">
+                <span className="text-[#7A756B] dark:text-[#8C877D]">
                   {getIntensityLabel(hoveredCell.completedCount)}
                 </span>
               </div>
-              <div className="font-mono tabular-nums font-medium text-emerald-600 dark:text-emerald-400">
+              <div className="font-mono tabular-nums font-medium text-[#5B7553] dark:text-[#74946A]">
                 {hoveredCell.completedCount} completed{' '}
-                <span className="text-slate-400 dark:text-zinc-500">
+                <span className="text-[#7A756B] dark:text-[#8C877D]">
                   / {Math.max(hoveredCell.completedCount, hoveredCell.plannedCount)} planned
                 </span>
               </div>
             </>
           ) : (
             <>
-              <span className="text-slate-600 dark:text-zinc-400">
-                Hover any square to trigger a floating glassmorphic inspection tooltip.
+              <span className="text-[#7A756B] dark:text-[#8C877D]">
+                Hover any keycap tile to inspect daily field log output.
               </span>
-              <span className="font-mono tabular-nums font-medium text-indigo-600 dark:text-indigo-400">
+              <span className="font-mono tabular-nums font-medium text-[#D94A2B] dark:text-[#E85D3F]">
                 Today: {todayCompletedCount} completed
               </span>
             </>

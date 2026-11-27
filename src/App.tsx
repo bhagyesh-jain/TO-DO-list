@@ -23,6 +23,7 @@ import { TodaysFocusCard } from './components/TodaysFocusCard';
 import { TaskComposer } from './components/TaskComposer';
 import { TaskListSection } from './components/TaskListSection';
 import { KeyMetricCards } from './components/KeyMetricCards';
+import { WeeklySummaryCard } from './components/WeeklySummaryCard';
 import { ActivityHeatmap } from './components/ActivityHeatmap';
 import { AnalyticsCharts } from './components/AnalyticsCharts';
 import { MagneticButton } from './components/SpotlightCard';
@@ -696,14 +697,14 @@ export default function App() {
                   allTasks={tasks}
                   currentStreak={currentStreak}
                   isDark={isDark}
-                  isDimmed={focusedWidget !== null && focusedWidget.startsWith('chart-')}
+                  isDimmed={focusedWidget !== null && (focusedWidget.startsWith('chart-') || focusedWidget === 'weekly-summary')}
                 />
 
                 <TaskComposer
                   onAddTask={handleAddTask}
                   inputRef={composerInputRef}
                   isDark={isDark}
-                  isDimmed={focusedWidget !== null && focusedWidget.startsWith('chart-')}
+                  isDimmed={focusedWidget !== null && (focusedWidget.startsWith('chart-') || focusedWidget === 'weekly-summary')}
                 />
 
                 <TaskListSection
@@ -723,11 +724,11 @@ export default function App() {
                   onClearCompleted={handleClearCompleted}
                   onFocusComposer={handleFocusComposer}
                   isDark={isDark}
-                  isDimmed={focusedWidget !== null && focusedWidget.startsWith('chart-')}
+                  isDimmed={focusedWidget !== null && (focusedWidget.startsWith('chart-') || focusedWidget === 'weekly-summary')}
                 />
               </div>
 
-              {/* Right Column (5 cols): Key Metrics, 6-Month Heatmap & Analytics Charts */}
+              {/* Right Column (5 cols): Key Metrics, Weekly Summary, 6-Month Heatmap & Analytics Charts */}
               <div className="flex flex-col gap-5 lg:col-span-5">
                 <KeyMetricCards
                   currentStreak={currentStreak}
@@ -737,6 +738,16 @@ export default function App() {
                   isDark={isDark}
                   focusedWidget={focusedWidget}
                   onFocusWidget={setFocusedWidget}
+                />
+
+                <WeeklySummaryCard
+                  tasks={tasks}
+                  weeklyData={weeklyData}
+                  isDark={isDark}
+                  isDimmed={focusedWidget !== null && focusedWidget !== 'weekly-summary'}
+                  onMouseEnterCard={() => setFocusedWidget('weekly-summary')}
+                  onMouseLeaveCard={() => setFocusedWidget(null)}
+                  onToggleTask={handleToggleTask}
                 />
 
                 <ActivityHeatmap
@@ -822,6 +833,16 @@ export default function App() {
                 isDark={isDark}
                 focusedWidget={focusedWidget}
                 onFocusWidget={setFocusedWidget}
+              />
+
+              <WeeklySummaryCard
+                tasks={tasks}
+                weeklyData={weeklyData}
+                isDark={isDark}
+                isDimmed={focusedWidget !== null && focusedWidget !== 'weekly-summary'}
+                onMouseEnterCard={() => setFocusedWidget('weekly-summary')}
+                onMouseLeaveCard={() => setFocusedWidget(null)}
+                onToggleTask={handleToggleTask}
               />
 
               <ActivityHeatmap
